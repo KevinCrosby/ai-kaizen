@@ -7,7 +7,7 @@ name = "ai-kaizen"
 version = "0.1.0"
 description = "CLI toolkit for AI-Kaizen operational transformation at scale"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = "MIT"
 dependencies = [
     "click>=8.1",
