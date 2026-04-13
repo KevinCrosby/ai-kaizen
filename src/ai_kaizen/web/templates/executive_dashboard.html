@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block title %}Executive Dashboard — AI-Kaizen{% endblock %}
+{% block content %}
+<h1>🏢 Executive AI Transformation Dashboard</h1>
+<p class="subtitle">CxO-level visibility across 7 research-backed metric categories</p>
+
+{# ── 1. ROI & VALUE REALIZATION ──────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>1. ROI &amp; Value Realization</h2>
+  <p class="exec-question">"What concrete value has AI delivered?"</p>
+  <div class="card-row">
+    <div class="card">
+      <h4>Value Captured</h4>
+      <span class="big-number">${{ "{:,.0f}".format(s.roi.total_value_captured or 0) }}</span>
+    </div>
+    <div class="card">
+      <h4>Total TCO</h4>
+      <span class="big-number">${{ "{:,.0f}".format(s.roi.total_tco or 0) }}</span>
+    </div>
+    <div class="card">
+      <h4>Net Value</h4>
+      {% set net = s.roi.total_net_value or 0 %}
+      <span class="big-number {% if net > 0 %}text-green{% elif net < 0 %}text-red{% endif %}">
+        ${{ "{:,.0f}".format(net) }}
+      </span>
+    </div>
+    <div class="card">
+      <h4>Portfolio ROI</h4>
+      {% set roi_pct = s.roi.portfolio_roi or 0 %}
+      <span class="big-number {% if roi_pct > 0 %}text-green{% elif roi_pct < 0 %}text-red{% endif %}">
+        {{ "{:.1f}".format(roi_pct * 100) }}%
+      </span>
+    </div>
+  </div>
+</section>
+
+{# ── 2. PILOT-TO-SCALE GAP ──────────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>2. Pilot-to-Scale Pipeline</h2>
+  <p class="exec-question">"How many projects are stuck in pilot purgatory?"</p>
+  {% set p = s.pilot_to_scale %}
+  <div class="card-row">
+    <div class="card">
+      <h4>Discovery</h4>
+      <span class="big-number">{{ p.by_loop.discovery }}</span>
+      <small>{{ "{:.0f}".format(p.discovery_pct) }}%</small>
+    </div>
+    <div class="card">
+      <h4>Validation</h4>
+      <span class="big-number">{{ p.by_loop.validation }}</span>
+      <small>{{ "{:.0f}".format(p.validation_pct) }}%</small>
+    </div>
+    <div class="card">
+      <h4>Scaling</h4>
+      <span class="big-number text-green">{{ p.by_loop.scaling }}</span>
+      <small>{{ "{:.0f}".format(p.scaling_pct) }}%</small>
+    </div>
+    <div class="card">
+      <h4>At Scale Rate</h4>
+      {% set scale_rate = (p.at_scale / p.total * 100) if p.total else 0 %}
+      <span class="big-number {% if scale_rate >= 40 %}text-green{% elif scale_rate < 20 %}text-red{% else %}text-amber{% endif %}">
+        {{ "{:.0f}".format(scale_rate) }}%
+      </span>
+      <small>Target: ≥40%</small>
+    </div>
+  </div>
+  {% if p.total > 0 %}
+  <div class="progress-bar-container">
+    <div class="progress-segment seg-discovery" style="width: {{ p.discovery_pct }}%;" title="Discovery: {{ p.by_loop.discovery }}"></div>
+    <div class="progress-segment seg-validation" style="width: {{ p.validation_pct }}%;" title="Validation: {{ p.by_loop.validation }}"></div>
+    <div class="progress-segment seg-scaling" style="width: {{ p.scaling_pct }}%;" title="Scaling: {{ p.by_loop.scaling }}"></div>
+  </div>
+  <div class="legend-row">
+    <span class="legend-dot seg-discovery"></span> Discovery
+    <span class="legend-dot seg-validation"></span> Validation
+    <span class="legend-dot seg-scaling"></span> Scaling
+  </div>
+  {% endif %}
+</section>
+
+{# ── 3. WORKFORCE READINESS ──────────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>3. Workforce Readiness &amp; Skills Gap</h2>
+  <p class="exec-question">"Do we have the skills to execute?" — #1 barrier (62% of orgs)</p>
+  {% set wf = s.workforce %}
+  {% if wf %}
+  <div class="card-row">
+    <div class="card">
+      <h4>AI Fluency Score</h4>
+      <span class="big-number">{{ "{:.1f}".format(wf.ai_fluency_score) }}</span>
+      <small>/ 5.0</small>
+    </div>
+    <div class="card">
+      <h4>AI-Trained</h4>
+      {% set train_pct = (wf.ai_trained_count / wf.total_headcount * 100) if wf.total_headcount else 0 %}
+      <span class="big-number">{{ "{:.0f}".format(train_pct) }}%</span>
+      <small>{{ wf.ai_trained_count }} / {{ wf.total_headcount }}</small>
+    </div>
+    <div class="card">
+      <h4>Roles Redesigned</h4>
+      {% set role_pct = (wf.roles_redesigned / wf.roles_total * 100) if wf.roles_total else 0 %}
+      <span class="big-number">{{ "{:.0f}".format(role_pct) }}%</span>
+      <small>{{ wf.roles_redesigned }} / {{ wf.roles_total }}</small>
+    </div>
+    <div class="card">
+      <h4>Upskilling Completion</h4>
+      <span class="big-number {% if wf.upskilling_completion_pct >= 75 %}text-green{% elif wf.upskilling_completion_pct < 40 %}text-red{% else %}text-amber{% endif %}">
+        {{ "{:.0f}".format(wf.upskilling_completion_pct) }}%
+      </span>
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">No workforce assessment recorded yet.</p>
+  {% endif %}
+
+  <details class="form-accordion">
+    <summary>Record Workforce Assessment</summary>
+    <form method="POST" action="{{ url_for('main.workforce_assess') }}" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Total Headcount <input type="number" name="total_headcount" min="1" required value="{{ wf.total_headcount if wf else '' }}"></label>
+      <label>AI-Trained Count <input type="number" name="ai_trained_count" min="0" required value="{{ wf.ai_trained_count if wf else '' }}"></label>
+      <label>AI Fluency Score (0-5) <input type="number" step="0.1" name="ai_fluency_score" min="0" max="5" required value="{{ wf.ai_fluency_score if wf else '' }}"></label>
+      <label>Roles Redesigned <input type="number" name="roles_redesigned" min="0" required value="{{ wf.roles_redesigned if wf else '' }}"></label>
+      <label>Total Roles <input type="number" name="roles_total" min="1" required value="{{ wf.roles_total if wf else '' }}"></label>
+      <label>Upskilling Completion % <input type="number" step="0.1" name="upskilling_completion_pct" min="0" max="100" required value="{{ wf.upskilling_completion_pct if wf else '' }}"></label>
+      <label class="full-width">Notes <textarea name="notes" rows="2">{{ wf.notes if wf else '' }}</textarea></label>
+      <button type="submit" class="btn">Save Assessment</button>
+    </form>
+  </details>
+</section>
+
+{# ── 4. GOVERNANCE & RESPONSIBLE AI ──────────────────────────────────── #}
+<section class="exec-section">
+  <h2>4. AI Governance &amp; Responsible AI</h2>
+  <p class="exec-question">"Are we governing AI agents properly?" — Only 1-in-5 have mature governance</p>
+  {% set gov = s.governance %}
+  <div class="card-row">
+    <div class="card">
+      <h4>Review Coverage</h4>
+      <span class="big-number {% if gov.coverage_pct >= 80 %}text-green{% elif gov.coverage_pct < 50 %}text-red{% else %}text-amber{% endif %}">
+        {{ "{:.0f}".format(gov.coverage_pct) }}%
+      </span>
+      <small>{{ gov.with_reviews }} / {{ gov.total_active }} initiatives</small>
+    </div>
+    <div class="card">
+      <h4>Completed Reviews</h4>
+      <span class="big-number">{{ "{:.0f}".format(gov.completion_pct) }}%</span>
+      <small>{{ gov.completed_reviews }} completed</small>
+    </div>
+    <div class="card">
+      <h4>Eval Suite Coverage</h4>
+      {% set ec = s.eval_coverage %}
+      <span class="big-number {% if ec.suite_coverage_pct >= 80 %}text-green{% elif ec.suite_coverage_pct < 50 %}text-red{% else %}text-amber{% endif %}">
+        {{ "{:.0f}".format(ec.suite_coverage_pct) }}%
+      </span>
+      <small>{{ ec.with_suites }} / {{ ec.total_active }}</small>
+    </div>
+    <div class="card">
+      <h4>Active Eval Runs</h4>
+      <span class="big-number">{{ "{:.0f}".format(ec.run_coverage_pct) }}%</span>
+      <small>{{ ec.with_runs }} with runs</small>
+    </div>
+  </div>
+</section>
+
+{# ── 5. READINESS GAP ───────────────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>5. Strategic vs Operational Readiness</h2>
+  <p class="exec-question">"Strategy says yes, but can ops deliver?" — The Preparedness Gap</p>
+  {% set rg = s.readiness_gap %}
+  <div class="card-row">
+    <div class="card card-wide">
+      <h4>Operational Readiness</h4>
+      <span class="big-number {% if rg.ops_readiness_pct >= 75 %}text-green{% elif rg.ops_readiness_pct < 40 %}text-red{% else %}text-amber{% endif %}">
+        {{ rg.ops_readiness_pct }}%
+      </span>
+      <small>{{ rg.gap_assessment }}</small>
+    </div>
+    <div class="card">
+      <h4>Data Assessed</h4>
+      <span class="big-number">{{ "{:.0f}".format(rg.data_readiness.coverage_pct) }}%</span>
+      <small>{{ rg.data_readiness.assessed_count }} / {{ rg.data_readiness.total_active }}</small>
+    </div>
+    <div class="card">
+      <h4>Avg Data Score</h4>
+      <span class="big-number">{{ "{:.1f}".format(rg.data_readiness.avg_score) }}</span>
+      <small>/ 18</small>
+    </div>
+  </div>
+</section>
+
+{# ── 6. TRANSFORMATION DEPTH ────────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>6. Transformation Depth</h2>
+  <p class="exec-question">"Are we optimizing or truly transforming?" — Only 34% truly reimagining</p>
+  {% set td = s.transformation_depth %}
+  <div class="card-row">
+    <div class="card">
+      <h4>🔧 Optimize</h4>
+      <span class="big-number">{{ td.optimize }}</span>
+      <small>{{ "{:.0f}".format(td.optimize_pct) }}% — Surface-level AI</small>
+    </div>
+    <div class="card">
+      <h4>🔄 Redesign</h4>
+      <span class="big-number">{{ td.redesign }}</span>
+      <small>{{ "{:.0f}".format(td.redesign_pct) }}% — Process redesign</small>
+    </div>
+    <div class="card">
+      <h4>🚀 Reinvent</h4>
+      <span class="big-number text-green">{{ td.reinvent }}</span>
+      <small>{{ "{:.0f}".format(td.reinvent_pct) }}% — New products/models</small>
+    </div>
+    <div class="card">
+      <h4>Reinvention Rate</h4>
+      <span class="big-number {% if td.reinvent_pct >= 34 %}text-green{% elif td.reinvent_pct < 15 %}text-red{% else %}text-amber{% endif %}">
+        {{ "{:.0f}".format(td.reinvent_pct) }}%
+      </span>
+      <small>Benchmark: 34%</small>
+    </div>
+  </div>
+</section>
+
+{# ── 7. COST TRANSPARENCY ───────────────────────────────────────────── #}
+<section class="exec-section">
+  <h2>7. Cost Management &amp; TCO Transparency</h2>
+  <p class="exec-question">"What's the real all-in cost?" — Hidden costs of data prep, governance, change mgmt</p>
+  {% set ct = s.cost_transparency %}
+  <div class="card-row">
+    <div class="card">
+      <h4>Total TCO</h4>
+      <span class="big-number">${{ "{:,.0f}".format(ct.total_tco or 0) }}</span>
+    </div>
+    <div class="card">
+      <h4>Net Value</h4>
+      <span class="big-number {% if (ct.total_net or 0) > 0 %}text-green{% elif (ct.total_net or 0) < 0 %}text-red{% endif %}">
+        ${{ "{:,.0f}".format(ct.total_net or 0) }}
+      </span>
+    </div>
+  </div>
+  {% if ct.by_confidence %}
+  <h4>TCO by Confidence Level</h4>
+  <table class="table">
+    <thead><tr><th>Confidence</th><th>Initiatives</th><th>TCO</th><th>Captured</th></tr></thead>
+    <tbody>
+    {% for conf, data in ct.by_confidence.items() %}
+      <tr>
+        <td><span class="badge">{{ conf }}</span></td>
+        <td>{{ data.count }}</td>
+        <td>${{ "{:,.0f}".format(data.tco) }}</td>
+        <td>${{ "{:,.0f}".format(data.captured) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+
+{# ── SOURCES ─────────────────────────────────────────────────────────── #}
+<section class="exec-section sources">
+  <h3>📊 Research Sources</h3>
+  <ul>
+    <li><strong>Deloitte</strong> State of AI 2026 — 3,235 leaders across 24 countries</li>
+    <li><strong>BCG</strong> AI Survey — 1,400 C-suite executives</li>
+    <li><strong>MIT Sloan / BCG</strong> AI Global Executive Study — Pioneer vs Passive maturity</li>
+    <li><strong>PwC</strong> AI Transformation Research — Agentic AI + workforce redesign</li>
+  </ul>
+</section>
+
+{% endblock %}

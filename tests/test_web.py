@@ -280,3 +280,113 @@ class TestExport:
     def test_export_not_found(self, client):
         resp = client.get("/initiatives/bad-id/export?format=json")
         assert resp.status_code == 404
+
+
+class TestExecutiveDashboard:
+    def test_exec_dashboard_empty(self, client):
+        resp = client.get("/executive")
+        assert resp.status_code == 200
+        assert b"Executive AI Transformation Dashboard" in resp.data
+        assert b"ROI" in resp.data
+        assert b"Pilot-to-Scale" in resp.data
+        assert b"Workforce" in resp.data
+
+    def test_exec_dashboard_with_data(self, seeded_client):
+        client, ini_id = seeded_client
+        resp = client.get("/executive")
+        assert resp.status_code == 200
+        assert b"Transformation Depth" in resp.data
+        assert b"Governance" in resp.data
+
+    def test_workforce_assessment(self, client):
+        resp = client.post("/executive/workforce", data={
+            "total_headcount": "500",
+            "ai_trained_count": "125",
+            "ai_fluency_score": "2.8",
+            "roles_redesigned": "15",
+            "roles_total": "80",
+            "upskilling_completion_pct": "45.0",
+            "notes": "Q1 assessment",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Workforce assessment saved" in resp.data
+        # Values should show on dashboard
+        assert b"2.8" in resp.data
+        assert b"Q1 assessment" in resp.data or b"45" in resp.data
+
+    def test_workforce_validation(self, client):
+        resp = client.post("/executive/workforce", data={
+            "total_headcount": "not_a_number",
+            "ai_trained_count": "10",
+            "ai_fluency_score": "3",
+            "roles_redesigned": "5",
+            "roles_total": "50",
+            "upskilling_completion_pct": "20",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"must be a whole number" in resp.data
+
+    def test_governance_review(self, seeded_client):
+        client, ini_id = seeded_client
+        resp = client.post(f"/initiatives/{ini_id}/governance", data={
+            "review_type": "ethics",
+            "status": "completed",
+            "reviewer": "Jane Smith",
+            "findings": "No issues found",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Governance review recorded" in resp.data
+
+    def test_governance_invalid_type(self, seeded_client):
+        client, ini_id = seeded_client
+        resp = client.post(f"/initiatives/{ini_id}/governance", data={
+            "review_type": "invalid",
+            "status": "pending",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Review type must be" in resp.data
+
+    def test_governance_bad_initiative(self, client):
+        resp = client.post("/initiatives/bad-id/governance", data={
+            "review_type": "ethics",
+            "status": "pending",
+        })
+        assert resp.status_code == 404
+
+    def test_transformation_type_on_create(self, client):
+        resp = client.post("/initiatives", data={
+            "name": "Reinvention Project",
+            "severity": "S1",
+            "transformation_type": "reinvent",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Created initiative" in resp.data
+
+
+class TestCxOService:
+    def test_full_snapshot(self, tmp_db):
+        from ai_kaizen.services.core import CxODashboardService, InitiativeService
+        ini_svc = InitiativeService(tmp_db)
+        ini = ini_svc.create(name="Test", severity="S2")
+        cxo = CxODashboardService(tmp_db)
+        snap = cxo.full_snapshot()
+        assert "roi" in snap
+        assert "pilot_to_scale" in snap
+        assert "workforce" in snap
+        assert "governance" in snap
+        assert "readiness_gap" in snap
+        assert "transformation_depth" in snap
+        assert "cost_transparency" in snap
+        assert "eval_coverage" in snap
+        assert snap["pilot_to_scale"]["total"] == 1
+
+    def test_record_workforce(self, tmp_db):
+        from ai_kaizen.services.core import CxODashboardService
+        cxo = CxODashboardService(tmp_db)
+        result = cxo.record_workforce(
+            total_headcount=200, ai_trained_count=80,
+            ai_fluency_score=3.5, roles_redesigned=10,
+            roles_total=50, upskilling_completion_pct=60,
+        )
+        assert result["total_headcount"] == 200
+        assert result["ai_fluency_score"] == 3.5

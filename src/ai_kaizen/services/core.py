@@ -270,3 +270,70 @@ class DataReadinessService:
         else:
             dr["recommendation"] = "Fundamental infrastructure investment required"
         return dr
+
+
+class CxODashboardService:
+    """Aggregates cross-portfolio metrics for executive visibility."""
+
+    def __init__(self, store: Store):
+        self.store = store
+
+    def full_snapshot(self) -> dict:
+        """Return all 7 CxO metric categories in one call."""
+        pmo = PMOService(self.store)
+        return {
+            "roi": pmo.portfolio_summary(),
+            "pilot_to_scale": self.store.pilot_to_scale_summary(),
+            "workforce": self.store.latest_workforce_assessment(),
+            "governance": self.store.governance_summary(),
+            "readiness_gap": self._readiness_gap(),
+            "transformation_depth": self.store.transformation_depth_summary(),
+            "cost_transparency": self._cost_transparency(),
+            "eval_coverage": self.store.eval_coverage_summary(),
+        }
+
+    def _readiness_gap(self) -> dict:
+        """Strategic vs operational readiness gap."""
+        dr = self.store.data_readiness_portfolio()
+        eval_cov = self.store.eval_coverage_summary()
+        gov = self.store.governance_summary()
+        total = dr.get("total_active", 0) or eval_cov.get("total_active", 0) or 1
+        # Operational readiness = avg of data, eval, governance coverage
+        data_pct = dr.get("coverage_pct", 0) or 0
+        eval_pct = eval_cov.get("suite_coverage_pct", 0) or 0
+        gov_pct = gov.get("coverage_pct", 0) or 0
+        ops_readiness = (data_pct + eval_pct + gov_pct) / 3 if total else 0
+        return {
+            "data_readiness": dr,
+            "eval_coverage": eval_cov,
+            "governance": gov,
+            "ops_readiness_pct": round(ops_readiness, 1),
+            "gap_assessment": (
+                "Strong" if ops_readiness >= 75
+                else "Moderate" if ops_readiness >= 50
+                else "Significant gap" if ops_readiness >= 25
+                else "Critical — ops not ready"
+            ),
+        }
+
+    def _cost_transparency(self) -> dict:
+        """TCO breakdown + confidence distribution."""
+        roi = PMOService(self.store).portfolio_summary()
+        breakdown = self.store.tco_breakdown()
+        return {
+            "portfolio_roi": roi,
+            "by_confidence": breakdown,
+            "total_tco": roi.get("total_tco", 0),
+            "total_net": roi.get("total_net_value", 0),
+        }
+
+    def record_workforce(self, **kwargs) -> dict:
+        wid = f"wf-{_uid()}"
+        self.store.save_workforce_assessment(id=wid, **kwargs)
+        return self.store.latest_workforce_assessment()
+
+    def record_governance_review(self, initiative_id: str, review_type: str, **kwargs) -> str:
+        gid = f"gov-{_uid()}"
+        return self.store.save_governance_review(
+            id=gid, initiative_id=initiative_id, review_type=review_type, **kwargs
+        )

@@ -35,6 +35,12 @@ class Store:
 
     def _migrate(self):
         self.conn.executescript(SCHEMA)
+        # V2: add transformation_type to initiatives if not present
+        cols = [r[1] for r in self.conn.execute("PRAGMA table_info(initiatives)").fetchall()]
+        if "transformation_type" not in cols:
+            self.conn.execute(
+                "ALTER TABLE initiatives ADD COLUMN transformation_type TEXT DEFAULT 'optimize'"
+            )
         self.conn.commit()
 
     def close(self):
@@ -400,6 +406,200 @@ class Store:
         )
         return d
 
+    # --- Workforce Assessments (CxO Dashboard) ---
+
+    def save_workforce_assessment(self, **kwargs) -> str:
+        kwargs.setdefault("assessment_date", datetime.utcnow().isoformat())
+        kwargs.setdefault("notes", "")
+        cols = ", ".join(kwargs.keys())
+        placeholders = ", ".join(["?"] * len(kwargs))
+        self.conn.execute(
+            f"INSERT INTO workforce_assessments ({cols}) VALUES ({placeholders})",
+            list(kwargs.values()),
+        )
+        self.conn.commit()
+        return kwargs["id"]
+
+    def latest_workforce_assessment(self) -> Optional[dict]:
+        row = self.conn.execute(
+            "SELECT * FROM workforce_assessments ORDER BY assessment_date DESC LIMIT 1"
+        ).fetchone()
+        return dict(row) if row else None
+
+    def list_workforce_assessments(self) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT * FROM workforce_assessments ORDER BY assessment_date DESC"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    # --- Governance Reviews (CxO Dashboard) ---
+
+    def save_governance_review(self, **kwargs) -> str:
+        kwargs.setdefault("reviewed_at", datetime.utcnow().isoformat())
+        kwargs.setdefault("findings", "")
+        kwargs.setdefault("reviewer", "")
+        kwargs.setdefault("status", "pending")
+        cols = ", ".join(kwargs.keys())
+        placeholders = ", ".join(["?"] * len(kwargs))
+        self.conn.execute(
+            f"INSERT INTO governance_reviews ({cols}) VALUES ({placeholders})",
+            list(kwargs.values()),
+        )
+        self.conn.commit()
+        return kwargs["id"]
+
+    def list_governance_reviews(self, initiative_id: Optional[str] = None) -> list[dict]:
+        if initiative_id:
+            rows = self.conn.execute(
+                "SELECT * FROM governance_reviews WHERE initiative_id = ? ORDER BY reviewed_at DESC",
+                (initiative_id,),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT g.*, i.name as initiative_name FROM governance_reviews g "
+                "JOIN initiatives i ON g.initiative_id = i.id ORDER BY g.reviewed_at DESC"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def governance_summary(self) -> dict:
+        """Compute governance coverage stats across portfolio."""
+        total = self.conn.execute("SELECT COUNT(*) as cnt FROM initiatives WHERE status = 'active'").fetchone()["cnt"]
+        with_reviews = self.conn.execute(
+            "SELECT COUNT(DISTINCT g.initiative_id) as cnt FROM governance_reviews g "
+            "JOIN initiatives i ON g.initiative_id = i.id WHERE i.status = 'active'"
+        ).fetchone()["cnt"]
+        completed = self.conn.execute(
+            "SELECT COUNT(DISTINCT g.initiative_id) as cnt FROM governance_reviews g "
+            "JOIN initiatives i ON g.initiative_id = i.id "
+            "WHERE i.status = 'active' AND g.status = 'completed'"
+        ).fetchone()["cnt"]
+        return {
+            "total_active": total,
+            "with_reviews": with_reviews,
+            "completed_reviews": completed,
+            "coverage_pct": (with_reviews / total * 100) if total else 0,
+            "completion_pct": (completed / total * 100) if total else 0,
+        }
+
+    # --- CxO Aggregate Queries ---
+
+    def transformation_depth_summary(self) -> dict:
+        """Count initiatives by transformation_type."""
+        rows = self.conn.execute(
+            "SELECT COALESCE(transformation_type, 'optimize') as ttype, COUNT(*) as cnt "
+            "FROM initiatives WHERE status = 'active' "
+            "GROUP BY ttype ORDER BY cnt DESC"
+        ).fetchall()
+        result = {"optimize": 0, "redesign": 0, "reinvent": 0}
+        for row in rows:
+            result[row["ttype"]] = row["cnt"]
+        total = sum(result.values())
+        result["total"] = total
+        result["reinvent_pct"] = (result["reinvent"] / total * 100) if total else 0
+        result["redesign_pct"] = (result["redesign"] / total * 100) if total else 0
+        result["optimize_pct"] = (result["optimize"] / total * 100) if total else 0
+        return result
+
+    def pilot_to_scale_summary(self) -> dict:
+        """Compute pilot-to-scale pipeline metrics."""
+        rows = self.conn.execute(
+            "SELECT current_loop, COUNT(*) as cnt, "
+            "GROUP_CONCAT(name, ', ') as names "
+            "FROM initiatives WHERE status = 'active' "
+            "GROUP BY current_loop"
+        ).fetchall()
+        by_loop = {"discovery": 0, "validation": 0, "scaling": 0}
+        names_by_loop = {"discovery": [], "validation": [], "scaling": []}
+        for row in rows:
+            by_loop[row["current_loop"]] = row["cnt"]
+            names_by_loop[row["current_loop"]] = row["names"].split(", ") if row["names"] else []
+        total = sum(by_loop.values())
+        return {
+            "by_loop": by_loop,
+            "names_by_loop": names_by_loop,
+            "total": total,
+            "discovery_pct": (by_loop["discovery"] / total * 100) if total else 0,
+            "validation_pct": (by_loop["validation"] / total * 100) if total else 0,
+            "scaling_pct": (by_loop["scaling"] / total * 100) if total else 0,
+            "stuck_in_pilot": by_loop["discovery"] + by_loop["validation"],
+            "at_scale": by_loop["scaling"],
+        }
+
+    def data_readiness_portfolio(self) -> dict:
+        """Aggregate data readiness across all active initiatives."""
+        rows = self.conn.execute(
+            "SELECT d.*, i.name FROM data_readiness d "
+            "JOIN initiatives i ON d.initiative_id = i.id "
+            "WHERE i.status = 'active'"
+        ).fetchall()
+        if not rows:
+            total_active = self.conn.execute(
+                "SELECT COUNT(*) as cnt FROM initiatives WHERE status = 'active'"
+            ).fetchone()["cnt"]
+            return {"assessed_count": 0, "total_active": total_active, "avg_score": 0, "coverage_pct": 0, "items": []}
+        total_active = self.conn.execute(
+            "SELECT COUNT(*) as cnt FROM initiatives WHERE status = 'active'"
+        ).fetchone()["cnt"]
+        items = []
+        total_score = 0
+        for row in rows:
+            d = dict(row)
+            score = d["existence"] + d["accessibility"] + d["quality"] + \
+                    d["latency"] + d["history"] + d["coverage"]
+            d["total_score"] = score
+            total_score += score
+            items.append(d)
+        return {
+            "assessed_count": len(items),
+            "total_active": total_active,
+            "coverage_pct": (len(items) / total_active * 100) if total_active else 0,
+            "avg_score": total_score / len(items) if items else 0,
+            "items": sorted(items, key=lambda x: x["total_score"]),
+        }
+
+    def eval_coverage_summary(self) -> dict:
+        """Check how many active initiatives have eval suites and passing runs."""
+        total = self.conn.execute(
+            "SELECT COUNT(*) as cnt FROM initiatives WHERE status = 'active'"
+        ).fetchone()["cnt"]
+        with_suites = self.conn.execute(
+            "SELECT COUNT(DISTINCT es.initiative_id) as cnt FROM eval_suites es "
+            "JOIN initiatives i ON es.initiative_id = i.id WHERE i.status = 'active'"
+        ).fetchone()["cnt"]
+        with_runs = self.conn.execute(
+            "SELECT COUNT(DISTINCT er.initiative_id) as cnt FROM eval_runs er "
+            "JOIN initiatives i ON er.initiative_id = i.id WHERE i.status = 'active'"
+        ).fetchone()["cnt"]
+        return {
+            "total_active": total,
+            "with_suites": with_suites,
+            "with_runs": with_runs,
+            "suite_coverage_pct": (with_suites / total * 100) if total else 0,
+            "run_coverage_pct": (with_runs / total * 100) if total else 0,
+        }
+
+    def tco_breakdown(self) -> dict:
+        """TCO breakdown across portfolio by confidence level."""
+        rows = self.conn.execute("""
+            SELECT confidence, COUNT(*) as cnt,
+                   SUM(tco_to_date) as total_tco,
+                   SUM(value_captured) as total_captured
+            FROM (
+                SELECT initiative_id, confidence, tco_to_date, value_captured,
+                    ROW_NUMBER() OVER (PARTITION BY initiative_id ORDER BY recorded_at DESC) as rn
+                FROM roi_entries
+            ) WHERE rn = 1
+            GROUP BY confidence
+        """).fetchall()
+        result = {}
+        for row in rows:
+            result[row["confidence"]] = {
+                "count": row["cnt"],
+                "tco": row["total_tco"] or 0,
+                "captured": row["total_captured"] or 0,
+            }
+        return result
+
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS config (
@@ -534,4 +734,38 @@ CREATE TABLE IF NOT EXISTS roi_entries (
     notes TEXT DEFAULT '',
     recorded_at TEXT NOT NULL
 );
+
+-- CxO Dashboard: Workforce readiness assessments (org-level)
+CREATE TABLE IF NOT EXISTS workforce_assessments (
+    id TEXT PRIMARY KEY,
+    assessment_date TEXT NOT NULL,
+    total_headcount INTEGER DEFAULT 0,
+    ai_trained_count INTEGER DEFAULT 0,
+    ai_fluency_score REAL DEFAULT 0.0,
+    roles_redesigned INTEGER DEFAULT 0,
+    roles_total INTEGER DEFAULT 0,
+    upskilling_completion_pct REAL DEFAULT 0.0,
+    notes TEXT DEFAULT ''
+);
+
+-- CxO Dashboard: Governance tracking per initiative
+CREATE TABLE IF NOT EXISTS governance_reviews (
+    id TEXT PRIMARY KEY,
+    initiative_id TEXT NOT NULL REFERENCES initiatives(id),
+    review_type TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    reviewer TEXT DEFAULT '',
+    findings TEXT DEFAULT '',
+    reviewed_at TEXT NOT NULL
+);
+
+-- CxO Dashboard: Transformation type tagging on initiatives
+-- Uses ALTER TABLE to add column if not exists (safe migration)
+"""
+
+MIGRATION_V2 = """
+-- Add transformation_type to initiatives if not present
+-- optimize = layering AI on existing process
+-- redesign = redesigning key processes around AI
+-- reinvent = creating new products/services or reinventing business models
 """

@@ -17,6 +17,7 @@ from flask import (
 )
 
 from ai_kaizen.services.core import (
+    CxODashboardService,
     DataReadinessService,
     EvalService,
     InitiativeService,
@@ -82,6 +83,9 @@ VALID_SEVERITIES = {"S0", "S1", "S2", "S3"}
 VALID_PHASES = {"plan", "do", "check", "act"}
 VALID_LEVELS = {"L0", "L1", "L2", "L2.5", "L3"}
 VALID_CONFIDENCE = {"projected", "estimated", "measured", "validated"}
+VALID_TRANSFORMATION_TYPES = {"optimize", "redesign", "reinvent"}
+VALID_GOV_TYPES = {"ethics", "security", "privacy", "compliance", "bias_audit", "data_governance"}
+VALID_GOV_STATUSES = {"pending", "in_progress", "completed", "flagged"}
 
 
 # ── dashboard ────────────────────────────────────────────────────────────
@@ -117,12 +121,15 @@ def initiative_create():
     name = request.form.get("name", "").strip()
     severity = request.form.get("severity", "S2")
     description = request.form.get("description", "").strip()
+    transformation_type = request.form.get("transformation_type", "optimize")
 
     errors = []
     if err := _validate_required(name, "Name"):
         errors.append(err)
     if severity not in VALID_SEVERITIES:
         errors.append(f"Severity must be one of: {', '.join(sorted(VALID_SEVERITIES))}")
+    if transformation_type not in VALID_TRANSFORMATION_TYPES:
+        errors.append(f"Transformation type must be one of: {', '.join(sorted(VALID_TRANSFORMATION_TYPES))}")
 
     if errors:
         _flash_errors(errors)
@@ -131,6 +138,8 @@ def initiative_create():
     try:
         store = _store()
         ini = InitiativeService(store).create(name=name, description=description, severity=severity)
+        # Update transformation_type separately (added in v2 migration)
+        store.update_initiative(ini["id"], transformation_type=transformation_type)
         flash(f"Created initiative: {ini['name']}", "success")
         return redirect(url_for("main.initiative_detail", initiative_id=ini["id"]))
     except Exception:
@@ -469,3 +478,93 @@ def initiative_export(initiative_id: str):
 
     # Default: render as HTML
     return render_template("export.html", ini=ini, data=data)
+
+
+# ── CxO Executive Dashboard ─────────────────────────────────────────────
+
+@bp.route("/executive")
+def executive_dashboard():
+    store = _store()
+    cxo = CxODashboardService(store)
+    snapshot = cxo.full_snapshot()
+    return render_template("executive_dashboard.html", s=snapshot)
+
+
+# ── workforce assessment ─────────────────────────────────────────────────
+
+@bp.route("/executive/workforce", methods=["POST"])
+def workforce_assess():
+    errors = []
+    headcount, err = _validate_int(request.form.get("total_headcount", ""), "Total Headcount", min_val=1)
+    if err:
+        errors.append(err)
+    trained, err = _validate_int(request.form.get("ai_trained_count", ""), "AI-Trained Count", min_val=0)
+    if err:
+        errors.append(err)
+    fluency, err = _validate_float(request.form.get("ai_fluency_score", ""), "AI Fluency Score")
+    if err:
+        errors.append(err)
+    roles_redesigned, err = _validate_int(request.form.get("roles_redesigned", ""), "Roles Redesigned", min_val=0)
+    if err:
+        errors.append(err)
+    roles_total, err = _validate_int(request.form.get("roles_total", ""), "Roles Total", min_val=1)
+    if err:
+        errors.append(err)
+    upskilling, err = _validate_float(request.form.get("upskilling_completion_pct", ""), "Upskilling %")
+    if err:
+        errors.append(err)
+
+    if errors:
+        _flash_errors(errors)
+        return redirect(url_for("main.executive_dashboard"))
+
+    try:
+        store = _store()
+        notes = request.form.get("notes", "").strip()
+        CxODashboardService(store).record_workforce(
+            total_headcount=headcount, ai_trained_count=trained,
+            ai_fluency_score=fluency, roles_redesigned=roles_redesigned,
+            roles_total=roles_total, upskilling_completion_pct=upskilling,
+            notes=notes,
+        )
+        flash("Workforce assessment saved", "success")
+    except Exception:
+        logger.exception("Failed to save workforce assessment")
+        flash("Failed to save workforce assessment", "error")
+
+    return redirect(url_for("main.executive_dashboard"))
+
+
+# ── governance review ────────────────────────────────────────────────────
+
+@bp.route("/initiatives/<initiative_id>/governance", methods=["POST"])
+def governance_review(initiative_id: str):
+    _get_initiative_or_404(initiative_id)
+
+    review_type = request.form.get("review_type", "")
+    status = request.form.get("status", "pending")
+    reviewer = request.form.get("reviewer", "").strip()
+    findings = request.form.get("findings", "").strip()
+
+    errors = []
+    if review_type not in VALID_GOV_TYPES:
+        errors.append(f"Review type must be one of: {', '.join(sorted(VALID_GOV_TYPES))}")
+    if status not in VALID_GOV_STATUSES:
+        errors.append(f"Status must be one of: {', '.join(sorted(VALID_GOV_STATUSES))}")
+
+    if errors:
+        _flash_errors(errors)
+        return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
+
+    try:
+        store = _store()
+        CxODashboardService(store).record_governance_review(
+            initiative_id=initiative_id, review_type=review_type,
+            status=status, reviewer=reviewer, findings=findings,
+        )
+        flash(f"Governance review recorded: {review_type}", "success")
+    except Exception:
+        logger.exception("Failed to record governance review")
+        flash("Failed to record governance review", "error")
+
+    return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
