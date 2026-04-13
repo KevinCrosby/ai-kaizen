@@ -197,6 +197,151 @@ class GembaObservation(BaseModel):
     walk_date: datetime = Field(default_factory=datetime.utcnow)
 
 
+# --- PMO / Portfolio Models ---
+
+class TShirtSize(str, enum.Enum):
+    S = "S"
+    M = "M"
+    L = "L"
+    XL = "XL"
+
+
+class IntakeRecommendation(str, enum.Enum):
+    FAST_TRACK = "fast_track"
+    QUALIFIED = "qualified"
+    CONDITIONAL = "conditional"
+    DECLINE = "decline"
+
+
+class ROIConfidence(str, enum.Enum):
+    PROJECTED = "projected"   # ±50%
+    ESTIMATED = "estimated"   # ±30%
+    MEASURED = "measured"     # ±15%
+    VALIDATED = "validated"   # ±10%
+
+
+class InitiativeScore(BaseModel):
+    """7-dimension scoring rubric for initiative intake."""
+    initiative_id: str
+    business_value: int = Field(ge=1, le=5, description="V: Quantifiable business impact")
+    baseline_measurability: int = Field(ge=1, le=5, description="B: Can we measure current state?")
+    data_readiness: int = Field(ge=1, le=5, description="D: Layer 0 readiness mapped to 1-5")
+    change_readiness: int = Field(ge=1, le=5, description="C: Stakeholder willingness + culture")
+    reversibility: int = Field(ge=1, le=5, description="R: How easily can we undo bad deployment?")
+    compliance_burden: int = Field(ge=1, le=5, description="X: Regulatory/legal requirements (1=heavy, 5=none)")
+    platform_reuse: int = Field(ge=1, le=5, description="P: Builds shared capabilities?")
+    scored_at: datetime = Field(default_factory=datetime.utcnow)
+    notes: str = ""
+
+    @property
+    def total(self) -> int:
+        return (self.business_value * 2) + self.baseline_measurability + \
+               self.data_readiness + self.change_readiness + self.reversibility + \
+               (6 - self.compliance_burden) + self.platform_reuse
+
+    @property
+    def recommendation(self) -> IntakeRecommendation:
+        score = self.total
+        if score >= 30:
+            return IntakeRecommendation.FAST_TRACK
+        elif score >= 22:
+            return IntakeRecommendation.QUALIFIED
+        elif score >= 15:
+            return IntakeRecommendation.CONDITIONAL
+        else:
+            return IntakeRecommendation.DECLINE
+
+    @property
+    def value_score(self) -> int:
+        """Business value (weighted 2×)."""
+        return self.business_value * 2
+
+    @property
+    def feasibility_score(self) -> int:
+        """Sum of D + C + R + B."""
+        return self.data_readiness + self.change_readiness + \
+               self.reversibility + self.baseline_measurability
+
+    @property
+    def quadrant(self) -> str:
+        high_value = self.value_score >= 8
+        high_feasibility = self.feasibility_score >= 14
+        if high_value and high_feasibility:
+            return "Fast-Track"
+        elif high_value and not high_feasibility:
+            return "Strategic Bet"
+        elif not high_value and high_feasibility:
+            return "Quick Win"
+        else:
+            return "Decline"
+
+
+class ROIEntry(BaseModel):
+    """Tracks ROI at a point in time for an initiative."""
+    id: str
+    initiative_id: str
+    confidence: ROIConfidence = ROIConfidence.PROJECTED
+    value_created: float = 0.0    # annualized
+    value_captured: float = 0.0   # annualized
+    tco_to_date: float = 0.0
+    notes: str = ""
+    recorded_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @property
+    def capture_rate(self) -> float:
+        if self.value_created == 0:
+            return 0.0
+        return self.value_captured / self.value_created
+
+    @property
+    def net_value(self) -> float:
+        return self.value_captured - self.tco_to_date
+
+    @property
+    def roi(self) -> float:
+        if self.tco_to_date == 0:
+            return 0.0
+        return self.net_value / self.tco_to_date
+
+
+class EffortEstimate(BaseModel):
+    """T-shirt size effort estimation."""
+    initiative_id: str
+    size: TShirtSize
+    discovery_cost_low: float = 0.0
+    discovery_cost_high: float = 0.0
+    validation_cost_low: float = 0.0
+    validation_cost_high: float = 0.0
+    year1_tco_low: float = 0.0
+    year1_tco_high: float = 0.0
+    notes: str = ""
+    estimated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+TSHIRT_COSTS: dict[TShirtSize, dict[str, tuple[float, float]]] = {
+    TShirtSize.S: {
+        "discovery": (20_000, 50_000),
+        "validation": (80_000, 150_000),
+        "year1_tco": (150_000, 300_000),
+    },
+    TShirtSize.M: {
+        "discovery": (50_000, 100_000),
+        "validation": (150_000, 350_000),
+        "year1_tco": (300_000, 700_000),
+    },
+    TShirtSize.L: {
+        "discovery": (100_000, 200_000),
+        "validation": (350_000, 600_000),
+        "year1_tco": (700_000, 1_500_000),
+    },
+    TShirtSize.XL: {
+        "discovery": (200_000, 400_000),
+        "validation": (600_000, 1_200_000),
+        "year1_tco": (1_500_000, 3_000_000),
+    },
+}
+
+
 # --- Threshold lookup ---
 
 EVAL_THRESHOLDS: dict[SeverityClass, dict[EvalLevel, float]] = {

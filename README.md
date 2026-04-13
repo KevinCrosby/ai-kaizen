@@ -69,6 +69,26 @@ ai-kaizen status
 | S2: Efficiency | 100% | ≥80% | ≥80% |
 | S3: Advisory | 100% | ≥70% | ≥75% |
 
+## PMO: Portfolio Prioritization & ROI
+
+The toolkit includes a full PMO framework for managing multiple initiatives at scale:
+
+```bash
+ai-kaizen pmo intake                           # Interactive initiative canvas + scoring
+ai-kaizen pmo rank                             # Prioritized backlog (2×2 matrix)
+ai-kaizen pmo dashboard                        # Portfolio health scorecard
+ai-kaizen pmo capacity                         # WIP limit check + bottleneck analysis
+ai-kaizen roi track --value-created 420000 --value-captured 290000
+ai-kaizen roi portfolio                        # Portfolio-level ROI summary
+ai-kaizen pmo estimate --size M --severity S1  # T-shirt size → cost estimate
+```
+
+**7-Dimension Scoring Rubric:** Business Value (2×), Baseline Measurability, Data Readiness, Change Readiness, Reversibility, Compliance Burden, Platform Reuse → Score out of 40 → Fast-track / Qualified / Conditional / Decline.
+
+**ROI Confidence Progression:** Projected (±50%) → Estimated (±30%) → Measured (±15%) → Validated (±10%). Each level requires progressively harder evidence.
+
+See [docs/pmo-framework.md](docs/pmo-framework.md) for the complete PMO guide.
+
 ## Project Structure
 
 ```
@@ -82,6 +102,7 @@ ai-kaizen/
 │   └── scaffolds/          # Jinja2 eval templates
 ├── docs/
 │   ├── framework-v2.md     # Full framework document
+│   ├── pmo-framework.md    # PMO portfolio management guide
 │   └── research.md         # Foundation research
 └── tests/
 ```
