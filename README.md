@@ -91,6 +91,64 @@ ai-kaizen/
 - [Foundation Research: Kaizen, Gemba, AI/ML](https://gist.github.com/KevinCrosby/beacb8f1ac0cb5dfcd63c7d0c79c9bba)
 - [AI-Kaizen Framework v2](https://gist.github.com/KevinCrosby/6c409ca5cc5102a0b675d30ab2223f6f)
 
+## How People Use This
+
+### The Core Workflow
+
+**1. Start an initiative**
+```bash
+ai-kaizen init "Predictive Maintenance - Packaging Line 3"
+```
+Names and tracks a transformation initiative with severity class, autonomy target, and ownership.
+
+**2. Assess readiness**
+```bash
+ai-kaizen assess data-readiness
+```
+Interactive scorecard (0-18) across 6 dimensions — existence, accessibility, quality, latency, history, coverage. Outputs a go/no-go recommendation before you invest.
+
+**3. Define the outcome you're working backwards from**
+```bash
+ai-kaizen outcome set --metric "MTBF" --baseline "72h" --target "96-120h" --scope "Lines 1-4, Building B"
+```
+Forces specificity: what metric, what baseline, what target range, what operating envelope, what confounders.
+
+**4. Scaffold your eval suite**
+```bash
+ai-kaizen eval scaffold --level 0   # Safety invariants (prompt injection, PII, blast radius)
+ai-kaizen eval scaffold --level 1   # Feature assertions (start with 10-15, grow from production)
+```
+Generates actual pytest files with the 5-level eval structure pre-populated with domain-relevant stubs.
+
+**5. Track PDCA loops**
+```bash
+ai-kaizen pdca start discovery
+ai-kaizen pdca log --phase plan --note "Data readiness scored 11/18; scoping to sensor-rich lines only"
+ai-kaizen pdca gate                  # Checks kill criteria — tells you: proceed, hold, or kill
+```
+Three nested loops: Discovery (2-4 weeks) → Validation (6-12 weeks) → Scaling (ongoing). Gate checks enforce kill criteria automatically.
+
+**6. Monitor across initiatives**
+```bash
+ai-kaizen status                     # Portfolio dashboard: all initiatives at a glance
+ai-kaizen status --initiative pred-maint-line3   # Deep dive: evals, overrides, autonomy level, ROI confidence
+```
+
+### Who Uses What
+
+| Role | They Use | To Do |
+|------|----------|-------|
+| **VP Operations** | `status`, `pdca gate` | Portfolio oversight, go/no-go decisions |
+| **Transformation Owner** | `init`, `outcome`, `pdca` | Define initiatives, track PDCA loops, decide promotions |
+| **AI/Eval Engineer** | `eval scaffold`, `eval record` | Build and maintain eval suites |
+| **Frontline Supervisor** | Gate reports, override logs | Validate agent performance against floor reality |
+
+### The Key Idea
+
+**AI must earn the right to act.** Every agent starts at L0 (inform only) and can only advance to L1 → L2 → L3 autonomy by passing progressively harder eval gates — with operations leadership (not the AI team) making the promotion call based on evidence.
+
+The toolkit enforces this: no skipping levels, no vibes-based promotion, explicit kill criteria at every gate.
+
 ## Development
 
 ```bash
