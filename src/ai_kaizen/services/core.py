@@ -189,7 +189,19 @@ class PMOService:
         self.store = store
 
     def score_initiative(self, initiative_id: str, **scores) -> dict:
-        self.store.save_initiative_score(initiative_id=initiative_id, **scores)
+        # Map friendly names to store column names
+        mapped = {
+            "initiative_id": initiative_id,
+            "business_value": scores.get("business_value"),
+            "baseline_measurability": scores.get("measurability", scores.get("baseline_measurability")),
+            "data_readiness": scores.get("data_readiness"),
+            "change_readiness": scores.get("change_risk", scores.get("change_readiness")),
+            "reversibility": scores.get("reversibility"),
+            "compliance_burden": scores.get("compliance_risk", scores.get("compliance_burden")),
+            "platform_reuse": scores.get("reuse_potential", scores.get("platform_reuse")),
+            "notes": scores.get("notes", ""),
+        }
+        self.store.save_initiative_score(**mapped)
         return self.store.get_initiative_score(initiative_id)
 
     def ranked_backlog(self) -> list[dict]:

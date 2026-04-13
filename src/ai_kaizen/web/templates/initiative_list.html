@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Initiatives — AI-Kaizen{% endblock %}
+{% block content %}
+<h1>Initiatives</h1>
+
+<div class="card">
+  <h3>New Initiative</h3>
+  <form method="POST" action="{{ url_for('main.initiative_create') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" required placeholder="e.g. Predictive Maintenance - Line 3">
+      </div>
+      <div class="form-group">
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity">
+          <option value="S0">S0 — Safety-critical</option>
+          <option value="S1">S1 — Revenue/compliance</option>
+          <option value="S2" selected>S2 — Operational</option>
+          <option value="S3">S3 — Advisory</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="2" placeholder="Optional description"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Initiative</button>
+  </form>
+</div>
+
+{% if initiatives %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th><th>Severity</th><th>Loop → Phase</th><th>PMO Score</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ini in initiatives %}
+    <tr>
+      <td><a href="{{ url_for('main.initiative_detail', initiative_id=ini.id) }}">{{ ini.name }}</a></td>
+      <td><span class="badge badge-sev-{{ ini.severity_class|lower }}">{{ ini.severity_class }}</span></td>
+      <td>{{ ini.current_loop }} → {{ ini.current_phase }}</td>
+      <td>
+        {% if ini.id in scores %}
+          {{ scores[ini.id].total }}/40
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td><span class="badge badge-{{ ini.status }}">{{ ini.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No initiatives yet. Create one above.</p>
+{% endif %}
+{% endblock %}

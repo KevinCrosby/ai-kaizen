@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% block title %}{{ ini.name }} — AI-Kaizen{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>{{ ini.name }}</h1>
+  <div class="meta">
+    <span class="badge badge-sev-{{ ini.severity_class|lower }}">{{ ini.severity_class }}</span>
+    <span class="badge">{{ ini.autonomy_level }}</span>
+    <span class="badge badge-{{ ini.status }}">{{ ini.status }}</span>
+    <span>{{ ini.current_loop }} → {{ ini.current_phase }}</span>
+    <a href="{{ url_for('main.initiative_export', initiative_id=ini.id, format='json') }}" class="btn btn-small">Export JSON</a>
+  </div>
+</div>
+
+{# ── Gate Status ─────────────────────────────────────────── #}
+<div class="card card-gate card-gate-{{ gate.result }}">
+  <h3>Gate Check: {{ gate.result|upper }}</h3>
+  <p>{{ gate.rationale }}</p>
+  <div class="eval-checks">
+    {% for check in gate.eval_checks %}
+    <span class="badge {% if check.passing %}badge-green{% elif check.has_data %}badge-red{% else %}badge-gray{% endif %}">
+      {{ check.level }}: {% if check.has_data %}{{ "{:.0%}".format(check.actual) }}{% else %}—{% endif %}
+      (req: {{ "{:.0%}".format(check.required) }})
+    </span>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── Data Readiness ──────────────────────────────────────── #}
+<section class="section">
+  <h2>Data Readiness</h2>
+  {% if dr %}
+  <div class="card">
+    <div class="score-grid">
+      {% for dim in ["existence", "accessibility", "quality", "latency", "history", "coverage"] %}
+      <div class="score-item">
+        <label>{{ dim|title }}</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: {{ (dr[dim] / 3 * 100)|int }}%">{{ dr[dim] }}/3</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="score-total">Total: <strong>{{ dr.total_score }}/18</strong> — {{ dr.recommendation }}</p>
+  </div>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>{% if dr %}Update{% else %}Run{% endif %} Assessment</summary>
+    <form method="POST" action="{{ url_for('main.data_readiness', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% for dim in ["existence", "accessibility", "quality", "latency", "history", "coverage"] %}
+      <div class="form-group form-group-small">
+        <label>{{ dim|title }} (0-3)</label>
+        <input type="number" name="{{ dim }}" min="0" max="3" value="{{ dr[dim] if dr else '' }}" required>
+      </div>
+      {% endfor %}
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" name="notes" placeholder="Optional">
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </details>
+</section>
+
+{# ── Outcomes ────────────────────────────────────────────── #}
+<section class="section">
+  <h2>Outcomes</h2>
+  {% if outcomes %}
+  <table class="table">
+    <thead><tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Scope</th><th>Timeframe</th></tr></thead>
+    <tbody>
+      {% for o in outcomes %}
+      <tr>
+        <td><strong>{{ o.metric }}</strong></td>
+        <td>{{ o.baseline }}</td>
+        <td>{{ o.target_range }}</td>
+        <td>{{ o.scope or "—" }}</td>
+        <td>{{ o.timeframe or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>Add Outcome</summary>
+    <form method="POST" action="{{ url_for('main.outcome_create', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Metric *</label><input type="text" name="metric" required placeholder="e.g. MTBF"></div>
+      <div class="form-group"><label>Baseline *</label><input type="text" name="baseline" required placeholder="e.g. 72h"></div>
+      <div class="form-group"><label>Target *</label><input type="text" name="target" required placeholder="e.g. 96-120h"></div>
+      <div class="form-group"><label>Scope</label><input type="text" name="scope" placeholder="e.g. Lines 1-4"></div>
+      <div class="form-group"><label>Timeframe</label><input type="text" name="timeframe" placeholder="e.g. 6 months"></div>
+      <button type="submit" class="btn btn-primary">Add Outcome</button>
+    </form>
+  </details>
+</section>
+
+{# ── Eval Suites ─────────────────────────────────────────── #}
+<section class="section">
+  <h2>Eval Suites</h2>
+  {% if suites %}
+  <table class="table">
+    <thead><tr><th>Level</th><th>Description</th><th>Latest Pass Rate</th></tr></thead>
+    <tbody>
+      {% for s in suites %}
+      <tr>
+        <td><span class="badge">{{ s.level }}</span></td>
+        <td>{{ s.description or "—" }}</td>
+        <td>
+          {% if s.level in eval_runs %}
+            {% set run = eval_runs[s.level] %}
+            <span class="{% if run.pass_rate >= 0.95 %}text-green{% elif run.pass_rate >= 0.8 %}text-yellow{% else %}text-red{% endif %}">
+              {{ "{:.1%}".format(run.pass_rate) }} ({{ run.passed }}/{{ run.total }})
+            </span>
+          {% else %}
+            <span class="text-muted">No runs yet</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>Create Eval Suite</summary>
+    <form method="POST" action="{{ url_for('main.eval_scaffold', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label>Level</label>
+        <select name="level">
+          <option value="L0">L0 — Safety invariants</option>
+          <option value="L1">L1 — Assertions</option>
+          <option value="L2">L2 — Human + model</option>
+          <option value="L2.5">L2.5 — Continuous monitoring</option>
+          <option value="L3">L3 — Experiments</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Description</label><input type="text" name="description" placeholder="Optional"></div>
+      <button type="submit" class="btn btn-primary">Create Suite</button>
+    </form>
+  </details>
+  {% if suites %}
+  <details class="form-accordion">
+    <summary>Record Eval Run</summary>
+    <form method="POST" action="{{ url_for('main.eval_record', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label>Level</label>
+        <select name="level">
+          {% for s in suites %}<option value="{{ s.level }}">{{ s.level }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label>Total *</label><input type="number" name="total" min="1" required></div>
+      <div class="form-group"><label>Passed *</label><input type="number" name="passed" min="0" required></div>
+      <div class="form-group"><label>Notes</label><input type="text" name="notes" placeholder="Optional"></div>
+      <button type="submit" class="btn btn-primary">Record Run</button>
+    </form>
+  </details>
+  {% endif %}
+</section>
+
+{# ── PDCA History ────────────────────────────────────────── #}
+<section class="section">
+  <h2>PDCA History</h2>
+  {% if entries %}
+  <div class="timeline">
+    {% for e in entries %}
+    <div class="timeline-item">
+      <span class="badge badge-phase-{{ e.phase }}">{{ e.phase }}</span>
+      <span class="text-muted">[{{ e.loop }}]</span>
+      {{ e.note }}
+      <small class="text-muted">{{ e.created_at[:16] }}</small>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>Log PDCA Entry</summary>
+    <form method="POST" action="{{ url_for('main.pdca_log', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label>Phase</label>
+        <select name="phase">
+          <option value="plan">Plan</option>
+          <option value="do">Do</option>
+          <option value="check">Check</option>
+          <option value="act">Act</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex: 2"><label>Note *</label><input type="text" name="note" required placeholder="What happened?"></div>
+      <button type="submit" class="btn btn-primary">Log</button>
+    </form>
+  </details>
+</section>
+
+{# ── PMO Score ───────────────────────────────────────────── #}
+<section class="section">
+  <h2>PMO Score</h2>
+  {% if score %}
+  <div class="card">
+    <div class="score-summary">
+      <span class="big-number">{{ score.total }}/40</span>
+      <span class="badge {% if score.total >= 24 %}badge-green{% elif score.total >= 16 %}badge-yellow{% else %}badge-red{% endif %}">
+        {% if score.total >= 24 %}QUALIFIED{% elif score.total >= 16 %}CONDITIONAL{% else %}NOT QUALIFIED{% endif %}
+      </span>
+    </div>
+    <div class="score-breakdown">
+      V={{ score.business_value }}×2 &nbsp;
+      B={{ score.baseline_measurability }} &nbsp;
+      D={{ score.data_readiness }} &nbsp;
+      C={{ score.change_readiness }} &nbsp;
+      R={{ score.reversibility }} &nbsp;
+      X={{ score.compliance_burden }} &nbsp;
+      P={{ score.platform_reuse }}
+    </div>
+    {% if score.notes %}<p class="text-muted">{{ score.notes }}</p>{% endif %}
+  </div>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>{% if score %}Update{% else %}Score{% endif %} Initiative</summary>
+    <form method="POST" action="{{ url_for('main.pmo_score', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% set dims = [("business_value", "Value (V×2)", "business_value"), ("measurability", "Measurability (B)", "baseline_measurability"), ("data_readiness", "Data (D)", "data_readiness"), ("change_risk", "Change Risk (C)", "change_readiness"), ("reversibility", "Reversibility (R)", "reversibility"), ("compliance_risk", "Compliance (X)", "compliance_burden"), ("reuse_potential", "Reuse (P)", "platform_reuse")] %}
+      {% for key, label, db_key in dims %}
+      <div class="form-group form-group-small">
+        <label>{{ label }}</label>
+        <input type="number" name="{{ key }}" min="1" max="5" value="{{ score[db_key] if score else '' }}" required>
+      </div>
+      {% endfor %}
+      <div class="form-group"><label>Notes</label><input type="text" name="notes" value="{{ score.notes if score else '' }}"></div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </details>
+</section>
+
+{# ── ROI ─────────────────────────────────────────────────── #}
+<section class="section">
+  <h2>ROI</h2>
+  {% if roi %}
+  <div class="card">
+    <div class="card-row">
+      <div><label>Created</label><span class="big-number">${{ "{:,.0f}".format(roi.value_created) }}</span></div>
+      <div><label>Captured</label><span class="big-number">${{ "{:,.0f}".format(roi.value_captured) }}</span></div>
+      <div><label>TCO</label><span class="big-number">${{ "{:,.0f}".format(roi.tco_to_date) }}</span></div>
+      <div>
+        <label>Net</label>
+        {% set net = roi.value_captured - roi.tco_to_date %}
+        <span class="big-number {% if net > 0 %}text-green{% elif net < 0 %}text-red{% endif %}">${{ "{:,.0f}".format(net) }}</span>
+      </div>
+    </div>
+    <p><span class="badge">{{ roi.confidence }}</span> {% if roi.notes %}— {{ roi.notes }}{% endif %}</p>
+  </div>
+  {% endif %}
+  <details class="form-accordion">
+    <summary>{% if roi %}Update{% else %}Record{% endif %} ROI</summary>
+    <form method="POST" action="{{ url_for('main.roi_track', initiative_id=ini.id) }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Value Created ($) *</label><input type="number" name="value_created" step="0.01" min="0" value="{{ roi.value_created if roi else '' }}" required></div>
+      <div class="form-group"><label>Value Captured ($) *</label><input type="number" name="value_captured" step="0.01" min="0" value="{{ roi.value_captured if roi else '' }}" required></div>
+      <div class="form-group"><label>TCO ($) *</label><input type="number" name="tco" step="0.01" min="0" value="{{ roi.tco_to_date if roi else '' }}" required></div>
+      <div class="form-group">
+        <label>Confidence</label>
+        <select name="confidence">
+          {% for c in ["projected", "estimated", "measured", "validated"] %}
+          <option value="{{ c }}" {% if roi and roi.confidence == c %}selected{% endif %}>{{ c|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" name="notes" value="{{ roi.notes if roi else '' }}"></div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </details>
+</section>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Portfolio ROI — AI-Kaizen{% endblock %}
+{% block content %}
+<h1>Portfolio ROI</h1>
+
+<div class="card-row">
+  <div class="card">
+    <h3>Value Created</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_value_created or 0) }}</span>
+  </div>
+  <div class="card">
+    <h3>Value Captured</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_value_captured or 0) }}</span>
+  </div>
+  <div class="card">
+    <h3>Total TCO</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_tco or 0) }}</span>
+  </div>
+  <div class="card">
+    <h3>Portfolio ROI</h3>
+    {% set roi_pct = portfolio.portfolio_roi or 0 %}
+    <span class="big-number {% if roi_pct > 0 %}text-green{% elif roi_pct < 0 %}text-red{% endif %}">
+      {{ "{:.1f}".format(roi_pct) }}%
+    </span>
+  </div>
+</div>
+
+{% if roi_data %}
+<h2>By Initiative</h2>
+<table class="table">
+  <thead>
+    <tr><th>Initiative</th><th>Confidence</th><th>Created</th><th>Captured</th><th>TCO</th><th>Net</th></tr>
+  </thead>
+  <tbody>
+    {% for r in roi_data %}
+    <tr>
+      <td><a href="{{ url_for('main.initiative_detail', initiative_id=r.id) }}">{{ r.name }}</a></td>
+      <td><span class="badge">{{ r.confidence }}</span></td>
+      <td>${{ "{:,.0f}".format(r.value_created) }}</td>
+      <td>${{ "{:,.0f}".format(r.value_captured) }}</td>
+      <td>${{ "{:,.0f}".format(r.tco_to_date) }}</td>
+      {% set net = r.value_captured - r.tco_to_date %}
+      <td class="{% if net > 0 %}text-green{% elif net < 0 %}text-red{% endif %}">${{ "{:,.0f}".format(net) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No ROI data recorded yet.</p>
+{% endif %}
+{% endblock %}

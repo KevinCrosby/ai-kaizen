@@ -698,5 +698,22 @@ def export(fmt):
     click.echo("\n".join(lines))
 
 
+# ─── serve ──────────────────────────────────────────────────────────────
+
+@cli.command()
+@click.option("--host", default="127.0.0.1", help="Bind address (default: localhost only)")
+@click.option("--port", default=5000, type=int, help="Port to listen on")
+@click.option("--debug/--no-debug", default=False, help="Enable debug mode")
+def serve(host, port, debug):
+    """Start the AI-Kaizen web UI."""
+    from ai_kaizen.web.app import create_app
+
+    app = create_app()
+    console.print(f"\n  ⚡ AI-Kaizen Web UI")
+    console.print(f"  → http://{host}:{port}")
+    console.print(f"  Press Ctrl+C to stop\n")
+    app.run(host=host, port=port, debug=debug)
+
+
 if __name__ == "__main__":
     cli()

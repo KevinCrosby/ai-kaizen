@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AI-Kaizen{% endblock %}
+{% block content %}
+<h1>Portfolio Dashboard</h1>
+
+<div class="card-row">
+  <div class="card">
+    <h3>Active Initiatives</h3>
+    <span class="big-number">{{ capacity.active_count }}</span>
+    <small>/ {{ capacity.wip_limit }} WIP limit</small>
+    {% if not capacity.within_limit %}
+      <span class="badge badge-red">Over WIP</span>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h3>Value Captured</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_value_captured or 0) }}</span>
+  </div>
+  <div class="card">
+    <h3>Total TCO</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_tco or 0) }}</span>
+  </div>
+  <div class="card">
+    <h3>Portfolio ROI</h3>
+    {% set roi_pct = portfolio.portfolio_roi or 0 %}
+    <span class="big-number {% if roi_pct > 0 %}text-green{% elif roi_pct < 0 %}text-red{% endif %}">
+      {{ "{:.1f}".format(roi_pct) }}%
+    </span>
+  </div>
+</div>
+
+<h2>Initiatives</h2>
+{% if initiatives %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th><th>Severity</th><th>Loop</th><th>Phase</th><th>Autonomy</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ini in initiatives %}
+    <tr>
+      <td><a href="{{ url_for('main.initiative_detail', initiative_id=ini.id) }}">{{ ini.name }}</a></td>
+      <td><span class="badge badge-sev-{{ ini.severity_class|lower }}">{{ ini.severity_class }}</span></td>
+      <td>{{ ini.current_loop }}</td>
+      <td>{{ ini.current_phase }}</td>
+      <td>{{ ini.autonomy_level }}</td>
+      <td><span class="badge badge-{{ ini.status }}">{{ ini.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No initiatives yet. <a href="{{ url_for('main.initiative_list') }}">Create one →</a></p>
+{% endif %}
+
+<h2>Capacity by Loop</h2>
+<div class="card-row">
+  {% for loop_name in ["discovery", "validation", "scaling"] %}
+  <div class="card card-small">
+    <h4>{{ loop_name|title }}</h4>
+    <span class="big-number">{{ capacity.by_loop[loop_name]|length }}</span>
+    {% for name in capacity.by_loop[loop_name] %}
+      <div class="chip">{{ name }}</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

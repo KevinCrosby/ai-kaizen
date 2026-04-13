@@ -22,14 +22,16 @@ def get_db_path() -> Path:
 
 
 class Store:
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path: Optional[Path] = None, run_migrations: bool = True):
         self.db_path = db_path or get_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(self.db_path))
+        self.conn = sqlite3.connect(str(self.db_path), timeout=10)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA foreign_keys=ON")
-        self._migrate()
+        self.conn.execute("PRAGMA busy_timeout=5000")
+        if run_migrations:
+            self._migrate()
 
     def _migrate(self):
         self.conn.executescript(SCHEMA)
