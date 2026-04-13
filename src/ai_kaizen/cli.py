@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import logging
+import sys
+
 import click
 from rich.console import Console
 
+from ai_kaizen.logging_config import setup_logging
+from ai_kaizen.metrics import metrics
 from ai_kaizen.store.database import Store
 from ai_kaizen.services.core import (
     InitiativeService, OutcomeService, EvalService,
@@ -12,6 +17,7 @@ from ai_kaizen.services.core import (
 )
 
 console = Console()
+logger = logging.getLogger(__name__)
 
 
 def _store() -> Store:
@@ -26,7 +32,29 @@ def _fmt_money(val: float) -> str:
     return f"${val:.0f}"
 
 
-@click.group()
+class _KaizenGroup(click.Group):
+    """Custom group that logs commands and catches unhandled exceptions."""
+
+    def invoke(self, ctx):
+        setup_logging()
+        cmd_name = ctx.invoked_subcommand or "help"
+        logger.debug("CLI command: %s", cmd_name)
+        metrics.inc("cli_commands_total")
+        metrics.inc("cli_commands_total", tags={"command": cmd_name})
+        try:
+            return super().invoke(ctx)
+        except click.exceptions.Exit:
+            raise
+        except click.exceptions.Abort:
+            raise
+        except Exception as exc:
+            metrics.inc("cli_errors_total")
+            logger.error("Command '%s' failed: %s", cmd_name, exc, exc_info=True)
+            console.print(f"\n[bold red]Error:[/] {exc}\n")
+            sys.exit(1)
+
+
+@click.group(cls=_KaizenGroup)
 @click.version_option(package_name="ai-kaizen")
 def cli():
     """AI-Kaizen: Eval-first AI transformation toolkit."""
@@ -713,6 +741,34 @@ def serve(host, port, debug):
     console.print(f"  → http://{host}:{port}")
     console.print(f"  Press Ctrl+C to stop\n")
     app.run(host=host, port=port, debug=debug)
+
+
+# ─── metrics ────────────────────────────────────────────────────────────
+
+@cli.command("metrics")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def metrics_cmd(as_json):
+    """Show process metrics snapshot (counters, histograms)."""
+    import json as _json
+    snap = metrics.snapshot()
+    if as_json:
+        click.echo(_json.dumps(snap, indent=2))
+    else:
+        console.print(f"\n[bold]Process Metrics[/]  (uptime: {snap['uptime_seconds']}s)\n")
+        if snap["counters"]:
+            console.print("[bold]Counters:[/]")
+            for k, v in sorted(snap["counters"].items()):
+                console.print(f"  {k}: {v}")
+        if snap["histograms"]:
+            console.print("\n[bold]Histograms:[/]")
+            for k, v in sorted(snap["histograms"].items()):
+                line = f"  {k}: count={v['count']} min={v['min']}ms avg={v['avg']}ms max={v['max']}ms p50={v['p50']}ms"
+                if v.get("p95"):
+                    line += f" p95={v['p95']}ms"
+                console.print(line)
+        if not snap["counters"] and not snap["histograms"]:
+            console.print("  [dim]No metrics recorded yet[/]")
+        console.print()
 
 
 if __name__ == "__main__":

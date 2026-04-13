@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from typing import Optional
@@ -13,7 +14,10 @@ from ai_kaizen.domain.models import (
     SeverityClass,
     TShirtSize,
 )
+from ai_kaizen.metrics import metrics
 from ai_kaizen.store.database import Store
+
+logger = logging.getLogger(__name__)
 
 
 def _slug(name: str) -> str:
@@ -34,6 +38,8 @@ class InitiativeService:
         initiative_id = f"{slug}-{_uid()}"
         self.store.create_initiative(id=initiative_id, name=name, description=description, severity_class=severity)
         self.store.set_config("current_initiative", initiative_id)
+        logger.info("Created initiative: %s (%s, %s)", name, initiative_id, severity)
+        metrics.inc("initiatives_created")
         return self.store.get_initiative(initiative_id)
 
     def select(self, initiative_id: str) -> dict:
@@ -107,6 +113,8 @@ class EvalService:
             total=total, passed=passed, failed=failed, pass_rate=pass_rate,
             notes=notes, commit_ref=commit_ref,
         )
+        logger.info("Eval run recorded: %s %s — %d/%d (%.0f%%)", initiative_id, level, passed, total, pass_rate * 100)
+        metrics.inc("eval_runs_recorded")
         return self.store.latest_eval_run(initiative_id, level)
 
     def list_suites(self, initiative_id: str) -> list[dict]:
@@ -174,7 +182,7 @@ class PDCAService:
                 result = "passed"
                 rationale = "All kill criteria clear; all eval thresholds met"
 
-        return {
+        gate = {
             "initiative_id": initiative_id,
             "loop": ini["current_loop"],
             "result": result,
@@ -182,6 +190,10 @@ class PDCAService:
             "kill_criteria": criteria,
             "eval_checks": eval_checks,
         }
+        logger.info("Gate check: %s → %s (%s)", initiative_id, result, rationale[:80])
+        metrics.inc("gate_checks_total")
+        metrics.inc("gate_checks_total", tags={"result": result})
+        return gate
 
 
 class PMOService:
