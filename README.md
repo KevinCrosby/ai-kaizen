@@ -18,26 +18,137 @@ Every AI initiative must earn the right to act — progressing through bounded a
 | **Web UI** | Visual thinkers, stakeholder demos | `ai-kaizen serve` → http://localhost:5001 |
 | **Copilot Skill** | Natural language, agentic workflows | Just talk — 16 tools auto-activate on keywords |
 
-## Quick Start
+## Getting Started
+
+### Prerequisites
+
+- **Python 3.9+** (check with `python3 --version`)
+- **Git**
+- **pip** (comes with Python)
+
+### 1. Clone & Install
 
 ```bash
-# Install
 git clone https://github.com/KevinCrosby/ai-kaizen.git
 cd ai-kaizen
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+# .venv\Scripts\activate         # Windows
 pip install -e .
+```
 
-# CLI
-ai-kaizen init "Predictive Maintenance - Line 3"
+Verify it works:
+
+```bash
+ai-kaizen --version
+ai-kaizen --help
+```
+
+### 2. Run Your First Initiative (CLI)
+
+```bash
+# Create an initiative
+ai-kaizen init "Customer Support Ticket Routing"
+
+# Score data readiness (0-3 per dimension, interactive prompts)
 ai-kaizen assess data-readiness
-ai-kaizen outcome set --metric "MTBF" --baseline "72h" --target "96-120h"
-ai-kaizen eval scaffold --level L0
-ai-kaizen pdca start discovery
-ai-kaizen status
 
-# Web UI
-ai-kaizen serve              # http://localhost:5001
-ai-kaizen serve --host 0.0.0.0 --port 8080   # network-accessible
+# Define the outcome you're working backwards from
+ai-kaizen outcome set --metric "resolution time" --baseline "45 min avg" --target "15-25 min"
+
+# Scaffold safety eval tests
+ai-kaizen eval scaffold --level L0
+
+# Start the Discovery PDCA loop
+ai-kaizen pdca start discovery
+
+# Log what you learned
+ai-kaizen pdca log --phase plan --note "Data readiness 14/18. Routing labels exist but 30% are miscategorized."
+
+# Check the gate — are you ready to proceed?
+ai-kaizen pdca gate
+
+# View the full portfolio dashboard
+ai-kaizen status
+```
+
+### 3. Launch the Web UI
+
+```bash
+ai-kaizen serve                           # → http://localhost:5000
+ai-kaizen serve --port 8080               # custom port
+ai-kaizen serve --host 0.0.0.0 --debug    # network-accessible + auto-reload
+```
+
+Navigate to:
+- **/** — Portfolio dashboard (all initiatives at a glance)
+- **/executive** — CxO Executive Dashboard (7 research-backed metric categories)
+- **/initiatives** — Create & manage initiatives
+- **/portfolio/roi** — Portfolio ROI breakdown
+- **/metrics** — Process metrics (counters, latency histograms)
+
+### 4. Use the Copilot CLI Skill (Optional)
+
+If you use [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli), the 16 AI-Kaizen tools activate automatically:
+
+```bash
+# Per-repo (already included):
+# .github/extensions/ai-kaizen/extension.mjs
+
+# User-wide install:
+mkdir -p ~/.copilot/extensions/ai-kaizen
+cp .github/extensions/ai-kaizen/extension.mjs ~/.copilot/extensions/ai-kaizen/
+```
+
+Then just talk naturally — mention "kaizen", "initiative", "eval", or "transformation" and the tools auto-activate.
+
+### 5. PMO Portfolio Management
+
+When managing multiple initiatives:
+
+```bash
+# Score an initiative across 7 dimensions (1-5 each)
+ai-kaizen pmo score
+
+# View the prioritized backlog
+ai-kaizen pmo rank
+
+# Track ROI with confidence levels
+ai-kaizen roi track --value-created 420000 --value-captured 290000 --tco 180000
+
+# Portfolio health check
+ai-kaizen status
+```
+
+### 6. Export Reports
+
+```bash
+ai-kaizen export --format json      # machine-readable
+ai-kaizen export --format markdown  # shareable document
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AI_KAIZEN_DB` | `~/.ai-kaizen/kaizen.db` | Database file path |
+| `AI_KAIZEN_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
+| `AI_KAIZEN_LOG_JSON` | `0` | Set to `1` for structured JSON log output |
+| `AI_KAIZEN_SECRET_KEY` | auto-generated | Flask session secret key |
+
+### Data Storage
+
+All data lives in a single SQLite file at `~/.ai-kaizen/kaizen.db`. To start fresh:
+
+```bash
+rm ~/.ai-kaizen/kaizen.db
+```
+
+To use a project-specific database:
+
+```bash
+export AI_KAIZEN_DB=./my-project.db
+ai-kaizen init "My Project"
 ```
 
 ## CLI Commands
@@ -55,6 +166,7 @@ ai-kaizen serve --host 0.0.0.0 --port 8080   # network-accessible
 | `ai-kaizen status` | Portfolio dashboard or initiative deep-dive |
 | `ai-kaizen export` | Generate markdown/JSON reports |
 | `ai-kaizen serve` | Launch the web dashboard |
+| `ai-kaizen metrics` | Show process metrics (counters, latency) |
 
 ## Web UI
 
@@ -226,11 +338,34 @@ The toolkit enforces this: no skipping levels, no vibes-based promotion, explici
 ## Development
 
 ```bash
+git clone https://github.com/KevinCrosby/ai-kaizen.git
+cd ai-kaizen
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest -v                    # 66 tests
-ai-kaizen serve --debug      # Dev server with auto-reload
+
+# Run tests
+pytest -v                         # 83 tests
+
+# Run with debug logging
+AI_KAIZEN_LOG_LEVEL=DEBUG ai-kaizen status
+
+# Dev server with auto-reload
+ai-kaizen serve --debug
+
+# Check process metrics
+ai-kaizen metrics
+ai-kaizen metrics --json
 ```
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `command not found: ai-kaizen` | Activate venv: `source .venv/bin/activate` |
+| `No initiative selected` | Run `ai-kaizen init "Name"` or `ai-kaizen select` |
+| DB locked errors | Close other ai-kaizen processes; DB uses WAL mode with 5s timeout |
+| Web UI won't start | Check port isn't in use: `lsof -i :5000` |
+| Copilot skill not loading | Run `node --check .github/extensions/ai-kaizen/extension.mjs` |
 
 ## License
 
