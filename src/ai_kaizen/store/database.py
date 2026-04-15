@@ -446,6 +446,78 @@ class Store:
         )
         return d
 
+    # --- Value Events (granular value creation & capture tracking) ---
+
+    def record_value_event(self, **kwargs) -> str:
+        kwargs.setdefault("recorded_at", datetime.utcnow().isoformat())
+        kwargs.setdefault("evidence", "")
+        kwargs.setdefault("recurrence", "one_time")
+        kwargs.setdefault("confidence", "projected")
+        cols = ", ".join(kwargs.keys())
+        placeholders = ", ".join(["?"] * len(kwargs))
+        self._execute(
+            f"INSERT INTO value_events ({cols}) VALUES ({placeholders})",
+            list(kwargs.values()),
+            commit=True,
+        )
+        return kwargs["id"]
+
+    def list_value_events(self, initiative_id: str) -> list[dict]:
+        rows = self._execute(
+            "SELECT * FROM value_events WHERE initiative_id = ? ORDER BY recorded_at DESC",
+            (initiative_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def value_summary(self, initiative_id: str) -> dict:
+        """Aggregate value events by type and category for an initiative."""
+        rows = self._execute("""
+            SELECT
+                event_type,
+                category,
+                SUM(amount) as total_amount,
+                COUNT(*) as event_count,
+                GROUP_CONCAT(DISTINCT confidence) as confidence_levels
+            FROM value_events
+            WHERE initiative_id = ?
+            GROUP BY event_type, category
+            ORDER BY event_type, total_amount DESC
+        """, (initiative_id,)).fetchall()
+        creation = []
+        capture = []
+        total_created = 0.0
+        total_captured = 0.0
+        for row in rows:
+            d = dict(row)
+            if d["event_type"] == "creation":
+                creation.append(d)
+                total_created += d["total_amount"] or 0
+            else:
+                capture.append(d)
+                total_captured += d["total_amount"] or 0
+        return {
+            "creation": creation,
+            "capture": capture,
+            "total_created": total_created,
+            "total_captured": total_captured,
+            "capture_rate": total_captured / total_created if total_created else 0,
+        }
+
+    def portfolio_value_summary(self) -> dict:
+        """Portfolio-wide value events aggregated by category."""
+        rows = self._execute("""
+            SELECT
+                event_type,
+                category,
+                SUM(amount) as total_amount,
+                COUNT(*) as event_count,
+                COUNT(DISTINCT initiative_id) as initiative_count
+            FROM value_events
+            GROUP BY event_type, category
+            ORDER BY event_type, total_amount DESC
+        """).fetchall()
+        return [dict(r) for r in rows]
+
     # --- Workforce Assessments (CxO Dashboard) ---
 
     def save_workforce_assessment(self, **kwargs) -> str:
@@ -797,6 +869,20 @@ CREATE TABLE IF NOT EXISTS governance_reviews (
     reviewer TEXT DEFAULT '',
     findings TEXT DEFAULT '',
     reviewed_at TEXT NOT NULL
+);
+
+-- Value tracking: granular value creation and capture events
+CREATE TABLE IF NOT EXISTS value_events (
+    id TEXT PRIMARY KEY,
+    initiative_id TEXT NOT NULL REFERENCES initiatives(id),
+    event_type TEXT NOT NULL,        -- 'creation' or 'capture'
+    category TEXT NOT NULL,          -- cost_avoidance, revenue, efficiency, risk_reduction, quality
+    description TEXT NOT NULL,
+    amount REAL NOT NULL DEFAULT 0.0,
+    recurrence TEXT DEFAULT 'one_time',  -- one_time, monthly, quarterly, annual
+    confidence TEXT DEFAULT 'projected', -- projected, estimated, measured, validated
+    evidence TEXT DEFAULT '',         -- link or description of supporting evidence
+    recorded_at TEXT NOT NULL
 );
 
 -- CxO Dashboard: Transformation type tagging on initiatives

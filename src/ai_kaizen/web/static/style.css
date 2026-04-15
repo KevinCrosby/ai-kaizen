@@ -139,6 +139,7 @@ a:hover { text-decoration: underline; }
 }
 
 .badge-green { background: rgba(63, 185, 80, 0.2); color: var(--green); }
+.badge-blue { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
 .badge-red { background: rgba(248, 81, 73, 0.2); color: var(--red); }
 .badge-yellow { background: rgba(210, 153, 34, 0.2); color: var(--yellow); }
 .badge-gray { background: var(--border); color: var(--text-muted); }

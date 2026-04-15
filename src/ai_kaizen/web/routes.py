@@ -86,6 +86,9 @@ VALID_CONFIDENCE = {"projected", "estimated", "measured", "validated"}
 VALID_TRANSFORMATION_TYPES = {"optimize", "redesign", "reinvent"}
 VALID_GOV_TYPES = {"ethics", "security", "privacy", "compliance", "bias_audit", "data_governance"}
 VALID_GOV_STATUSES = {"pending", "in_progress", "completed", "flagged"}
+VALID_VALUE_EVENT_TYPES = {"creation", "capture"}
+VALID_VALUE_CATEGORIES = {"cost_avoidance", "revenue", "efficiency", "risk_reduction", "quality"}
+VALID_RECURRENCE = {"one_time", "monthly", "quarterly", "annual"}
 
 
 # ── dashboard ────────────────────────────────────────────────────────────
@@ -167,6 +170,8 @@ def initiative_detail(initiative_id: str):
     dr = DataReadinessService(store).get(initiative_id)
     score = store.get_initiative_score(initiative_id)
     roi = store.latest_roi(initiative_id)
+    value_events = store.list_value_events(initiative_id)
+    value_summary = store.value_summary(initiative_id)
 
     return render_template(
         "initiative_detail.html",
@@ -179,6 +184,8 @@ def initiative_detail(initiative_id: str):
         dr=dr,
         score=score,
         roi=roi,
+        value_events=value_events,
+        value_summary=value_summary,
     )
 
 
@@ -432,6 +439,57 @@ def roi_track(initiative_id: str):
     except Exception:
         logger.exception("Failed to record ROI")
         flash("Failed to record ROI", "error")
+
+    return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
+
+
+# ── value events ─────────────────────────────────────────────────────────
+
+@bp.route("/initiatives/<initiative_id>/value", methods=["POST"])
+def value_event_create(initiative_id: str):
+    _get_initiative_or_404(initiative_id)
+
+    errors = []
+    event_type = request.form.get("event_type", "")
+    if event_type not in VALID_VALUE_EVENT_TYPES:
+        errors.append(f"Event type must be one of: {', '.join(sorted(VALID_VALUE_EVENT_TYPES))}")
+
+    category = request.form.get("category", "")
+    if category not in VALID_VALUE_CATEGORIES:
+        errors.append(f"Category must be one of: {', '.join(sorted(VALID_VALUE_CATEGORIES))}")
+
+    description = request.form.get("description", "").strip()
+    if not description:
+        errors.append("Description is required")
+
+    amount, err = _validate_float(request.form.get("amount", ""), "Amount")
+    if err:
+        errors.append(err)
+
+    recurrence = request.form.get("recurrence", "one_time")
+    if recurrence not in VALID_RECURRENCE:
+        errors.append(f"Recurrence must be one of: {', '.join(sorted(VALID_RECURRENCE))}")
+
+    confidence = request.form.get("confidence", "projected")
+    if confidence not in VALID_CONFIDENCE:
+        errors.append(f"Confidence must be one of: {', '.join(sorted(VALID_CONFIDENCE))}")
+
+    if errors:
+        _flash_errors(errors)
+        return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
+
+    try:
+        store = _store()
+        evidence = request.form.get("evidence", "").strip()
+        PMOService(store).record_value_event(
+            initiative_id=initiative_id, event_type=event_type,
+            category=category, description=description, amount=amount,
+            recurrence=recurrence, confidence=confidence, evidence=evidence,
+        )
+        flash(f"Value {event_type} event recorded (${amount:,.0f})", "success")
+    except Exception:
+        logger.exception("Failed to record value event")
+        flash("Failed to record value event", "error")
 
     return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
 

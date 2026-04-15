@@ -233,6 +233,20 @@ class PMOService:
     def portfolio_summary(self) -> dict:
         return self.store.portfolio_roi_summary()
 
+    def record_value_event(self, initiative_id: str, event_type: str, category: str,
+                           description: str, amount: float, **kwargs) -> dict:
+        vid = f"val-{_uid()}"
+        self.store.record_value_event(
+            id=vid, initiative_id=initiative_id, event_type=event_type,
+            category=category, description=description, amount=amount, **kwargs,
+        )
+        logger.info("Value event: %s %s/%s $%.0f (%s)", initiative_id, event_type, category, amount, description[:50])
+        metrics.inc("value_events_recorded")
+        return {"id": vid, "event_type": event_type, "category": category, "amount": amount}
+
+    def value_summary(self, initiative_id: str) -> dict:
+        return self.store.value_summary(initiative_id)
+
     def estimate_effort(self, size: str) -> dict:
         ts = TShirtSize(size)
         costs = TSHIRT_COSTS[ts]

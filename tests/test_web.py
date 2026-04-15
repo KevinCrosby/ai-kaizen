@@ -390,3 +390,126 @@ class TestCxOService:
         )
         assert result["total_headcount"] == 200
         assert result["ai_fluency_score"] == 3.5
+
+
+class TestValueTracking:
+    def test_record_creation_event(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "creation",
+            "category": "cost_avoidance",
+            "description": "Reduced overtime from faster reads",
+            "amount": "150000",
+            "recurrence": "annual",
+            "confidence": "estimated",
+            "evidence": "Overtime report Q1 2026",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Value creation event recorded" in resp.data
+
+    def test_record_capture_event(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "capture",
+            "category": "efficiency",
+            "description": "Pharmacist time savings realized",
+            "amount": "80000",
+            "recurrence": "annual",
+            "confidence": "measured",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Value capture event recorded" in resp.data
+
+    def test_value_summary_shows_on_detail(self, seeded_client):
+        client, iid = seeded_client
+        # Record two events
+        client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "creation", "category": "risk_reduction",
+            "description": "Avoided adverse events", "amount": "500000",
+        })
+        client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "capture", "category": "revenue",
+            "description": "Throughput increase billed", "amount": "200000",
+        })
+        resp = client.get(f"/initiatives/{iid}")
+        assert resp.status_code == 200
+        assert b"Value Tracking" in resp.data
+        assert b"500,000" in resp.data
+        assert b"200,000" in resp.data
+
+    def test_invalid_event_type(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "invalid",
+            "category": "revenue",
+            "description": "test",
+            "amount": "100",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Event type must be" in resp.data
+
+    def test_invalid_category(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "creation",
+            "category": "bogus",
+            "description": "test",
+            "amount": "100",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Category must be" in resp.data
+
+    def test_missing_description(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.post(f"/initiatives/{iid}/value", data={
+            "event_type": "creation",
+            "category": "revenue",
+            "description": "",
+            "amount": "100",
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b"Description is required" in resp.data
+
+    def test_empty_value_tracking_section(self, seeded_client):
+        client, iid = seeded_client
+        resp = client.get(f"/initiatives/{iid}")
+        assert b"Value Tracking" in resp.data
+        assert b"No value events recorded yet" in resp.data
+
+
+class TestValueStore:
+    def test_value_summary_aggregation(self, tmp_db):
+        store = tmp_db
+        store.create_initiative(id="test-1", name="Test")
+        store.record_value_event(id="v1", initiative_id="test-1",
+            event_type="creation", category="cost_avoidance",
+            description="Avoided downtime", amount=300000)
+        store.record_value_event(id="v2", initiative_id="test-1",
+            event_type="creation", category="revenue",
+            description="New service", amount=100000)
+        store.record_value_event(id="v3", initiative_id="test-1",
+            event_type="capture", category="cost_avoidance",
+            description="Budget reallocated", amount=200000)
+
+        summary = store.value_summary("test-1")
+        assert summary["total_created"] == 400000
+        assert summary["total_captured"] == 200000
+        assert summary["capture_rate"] == 0.5
+        assert len(summary["creation"]) == 2
+        assert len(summary["capture"]) == 1
+
+    def test_portfolio_value_summary(self, tmp_db):
+        store = tmp_db
+        store.create_initiative(id="t1", name="A")
+        store.create_initiative(id="t2", name="B")
+        store.record_value_event(id="v1", initiative_id="t1",
+            event_type="creation", category="efficiency",
+            description="Faster", amount=100000)
+        store.record_value_event(id="v2", initiative_id="t2",
+            event_type="creation", category="efficiency",
+            description="Also faster", amount=50000)
+        result = store.portfolio_value_summary()
+        assert len(result) >= 1
+        eff = [r for r in result if r["category"] == "efficiency"]
+        assert eff[0]["total_amount"] == 150000
+        assert eff[0]["initiative_count"] == 2
