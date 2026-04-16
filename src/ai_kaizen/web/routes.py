@@ -101,11 +101,13 @@ def dashboard():
     initiatives = svc.list_all()
     portfolio = pmo.portfolio_summary()
     capacity = pmo.capacity_check()
+    roi_map = {ini["id"]: store.latest_roi(ini["id"]) for ini in initiatives}
     return render_template(
         "dashboard.html",
         initiatives=initiatives,
         portfolio=portfolio,
         capacity=capacity,
+        roi_map=roi_map,
     )
 
 
