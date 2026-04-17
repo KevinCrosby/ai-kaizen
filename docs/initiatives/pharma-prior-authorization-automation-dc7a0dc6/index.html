@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharma Prior Authorization Automation — AI-Kaizen</title>
+  <link rel="stylesheet" href="../../static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../" class="brand">⚡ AI-Kaizen</a>
+    <div class="nav-links">
+      <a href="../../">Dashboard</a>
+      <a href="../../executive/">Executive</a>
+      <a href="../../initiatives/">Initiatives</a>
+      <a href="../../portfolio/roi">Portfolio ROI</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    
+      
+    
+
+    
+
+<div class="page-header">
+  <h1>Pharma Prior Authorization Automation</h1>
+  <div class="meta">
+    <span class="badge badge-sev-s1">S1</span>
+    <span class="badge">L0</span>
+    <span class="badge badge-active">active</span>
+    <span>discovery → do</span>
+    <a href="../../initiatives/pharma-prior-authorization-automation-dc7a0dc6/export?format=json" class="btn btn-small">Export JSON</a>
+  </div>
+</div>
+
+
+<div class="card card-gate card-gate-blocked">
+  <h3>Gate Check: BLOCKED</h3>
+  <p>Eval thresholds not met: L1</p>
+  <div class="eval-checks">
+    
+    <span class="badge badge-green">
+      L0: 100%
+      (req: 100%)
+    </span>
+    
+    <span class="badge badge-red">
+      L1: 86%
+      (req: 90%)
+    </span>
+    
+    <span class="badge badge-gray">
+      L2: —
+      (req: 85%)
+    </span>
+    
+  </div>
+</div>
+
+
+<section class="section">
+  <h2>Data Readiness</h2>
+  
+  <div class="card">
+    <div class="score-grid">
+      
+      <div class="score-item">
+        <label>Existence</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 100%">3/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Accessibility</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 100%">3/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Quality</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Latency</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 100%">3/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>History</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Coverage</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+    </div>
+    <p class="score-total">Total: <strong>15/18</strong> — Proceed to outcome definition</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update Assessment</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Outcomes</h2>
+  
+  <table class="table">
+    <thead><tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Scope</th><th>Timeframe</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td><strong>Prior authorization turnaround time</strong></td>
+        <td>72 hours average (specialty pharmacy)</td>
+        <td>Under 4 hours for auto-adjudicable requests</td>
+        <td>Specialty pharmacy prior auth — oncology, rheumatology, neurology top 50 drugs</td>
+        <td>9 months</td>
+      </tr>
+      
+      <tr>
+        <td><strong>Pharmacist time per prior auth</strong></td>
+        <td>22 minutes average per PA request</td>
+        <td>Under 5 minutes for AI-assisted requests</td>
+        <td>Same drug scope</td>
+        <td>9 months</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+  <details class="form-accordion">
+    <summary>Add Outcome</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Eval Suites</h2>
+  
+  <table class="table">
+    <thead><tr><th>Level</th><th>Description</th><th>Latest Pass Rate</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td><span class="badge">L0</span></td>
+        <td>Safety: PHI handling, formulary data integrity, denial reason accuracy, fail-safe to human review</td>
+        <td>
+          
+            
+            <span class="text-green">
+              100.0% (18/18)
+            </span>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="badge">L1</span></td>
+        <td>Assertions: criteria matching accuracy per drug class, appeal letter quality, formulary lookup correctness</td>
+        <td>
+          
+            
+            <span class="text-yellow">
+              85.7% (30/35)
+            </span>
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+  <details class="form-accordion">
+    <summary>Create Eval Suite</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+  
+  <details class="form-accordion">
+    <summary>Record Eval Run</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+  
+</section>
+
+
+<section class="section">
+  <h2>PDCA History</h2>
+  
+  <div class="timeline">
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[discovery]</span>
+      Started discovery loop
+      <small class="text-muted">2026-04-15T06:38</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[discovery]</span>
+      Focus on top 50 specialty drugs by PA volume. Clinical criteria from payer portals — 8 major payers cover 82% of volume. Will use RAG over formulary PDFs + structured criteria tables. Agent architecture: criteria extraction → eligibility check → clinical match → recommendation draft → pharmacist review queue.
+      <small class="text-muted">2026-04-15T06:38</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-do">do</span>
+      <span class="text-muted">[discovery]</span>
+      Built RAG pipeline over 340 formulary documents. Criteria extraction accuracy: 91% on oncology drugs, 87% on rheumatology, 84% on neurology. Agent correctly matches clinical criteria to patient chart data in 88% of test cases (n=500). Main errors: complex step-therapy requirements (multi-drug sequences) and weight-based dosing calculations.
+      <small class="text-muted">2026-04-15T06:38</small>
+    </div>
+    
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Log PDCA Entry</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>PMO Score</h2>
+  
+  <div class="card">
+    <div class="score-summary">
+      <span class="big-number">31/40</span>
+      <span class="badge badge-green">
+        QUALIFIED
+      </span>
+    </div>
+    <div class="score-breakdown">
+      V=4×2 &nbsp;
+      B=4 &nbsp;
+      D=4 &nbsp;
+      C=4 &nbsp;
+      R=5 &nbsp;
+      X=3 &nbsp;
+      P=3
+    </div>
+    <p class="text-muted">Strong business value (PA backlog is #1 pharmacist complaint). Good baselines. Data accessible. Moderate change (pharmacist workflow). Highly reversible (human always in loop). Moderate compliance (state PA regulations vary). Some reuse for other authorization types.</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update Initiative</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>ROI</h2>
+  
+  <div class="card">
+    <div class="card-row">
+      <div><label>Created</label><span class="big-number">$2,400,000</span></div>
+      <div><label>Captured</label><span class="big-number">$0</span></div>
+      <div><label>TCO</label><span class="big-number">$380,000</span></div>
+      <div>
+        <label>Net</label>
+        
+        <span class="big-number text-red">$-380,000</span>
+      </div>
+    </div>
+    <p><span class="badge">projected</span> — Value created: 4 FTE pharmacist time savings (est. $600K/yr) + faster access to therapy. No captured value yet — still in discovery. TCO: RAG infrastructure, payer API integrations, pharmacist training.</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update ROI</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Value Tracking</h2>
+
+  
+  
+  <div class="card">
+    <div class="card-row">
+      <div>
+        <label>Total Created</label>
+        <span class="big-number">$2,400,000</span>
+      </div>
+      <div>
+        <label>Total Captured</label>
+        <span class="big-number">$0</span>
+      </div>
+      <div>
+        <label>Capture Rate</label>
+        <span class="big-number">0%</span>
+      </div>
+    </div>
+
+    
+    
+    <h4 style="margin-top: 1rem;">Value Creation</h4>
+    <table class="table">
+      <thead><tr><th>Category</th><th>Amount</th><th>Events</th><th>Confidence</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td><span class="badge">Quality</span></td>
+          <td>$1,200,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Efficiency</span></td>
+          <td>$600,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Cost Avoidance</span></td>
+          <td>$340,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Revenue</span></td>
+          <td>$260,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+      </tbody>
+    </table>
+    
+
+    
+  </div>
+  
+
+  
+  
+  <details style="margin-top: 1rem;">
+    <summary>Event Log (4)</summary>
+    <table class="table" style="margin-top: 0.5rem;">
+      <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Confidence</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Revenue</td>
+          <td>$260,000</td>
+          <td>Increased specialty pharmacy capture rate</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Cost Avoidance</td>
+          <td>$340,000</td>
+          <td>Reduced PA denials from criteria matching errors</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Quality</td>
+          <td>$1,200,000</td>
+          <td>Faster therapy access for patients (72h to 4h turnaround)</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Efficiency</td>
+          <td>$600,000</td>
+          <td>Pharmacist time savings: 22 min to 5 min per PA (4 FTE equiv)</td>
+          <td>projected</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </details>
+  
+
+  
+  <details class="form-accordion">
+    <summary>Record Value Event</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+  </main>
+
+  <footer class="footer">
+    <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radiology AI Triage - ED Chest X-rays — AI-Kaizen</title>
+  <link rel="stylesheet" href="../../static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../" class="brand">⚡ AI-Kaizen</a>
+    <div class="nav-links">
+      <a href="../../">Dashboard</a>
+      <a href="../../executive/">Executive</a>
+      <a href="../../initiatives/">Initiatives</a>
+      <a href="../../portfolio/roi">Portfolio ROI</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    
+      
+    
+
+    
+
+<div class="page-header">
+  <h1>Radiology AI Triage - ED Chest X-rays</h1>
+  <div class="meta">
+    <span class="badge badge-sev-s0">S0</span>
+    <span class="badge">L0</span>
+    <span class="badge badge-active">active</span>
+    <span>validation → act</span>
+    <a href="../../initiatives/radiology-ai-triage-ed-chest-x-rays-8390ad6e/export?format=json" class="btn btn-small">Export JSON</a>
+  </div>
+</div>
+
+
+<div class="card card-gate card-gate-blocked">
+  <h3>Gate Check: BLOCKED</h3>
+  <p>Eval thresholds not met: L1</p>
+  <div class="eval-checks">
+    
+    <span class="badge badge-green">
+      L0: 100%
+      (req: 100%)
+    </span>
+    
+    <span class="badge badge-red">
+      L1: 94%
+      (req: 95%)
+    </span>
+    
+    <span class="badge badge-green">
+      L2: 91%
+      (req: 90%)
+    </span>
+    
+  </div>
+</div>
+
+
+<section class="section">
+  <h2>Data Readiness</h2>
+  
+  <div class="card">
+    <div class="score-grid">
+      
+      <div class="score-item">
+        <label>Existence</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 100%">3/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Accessibility</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Quality</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Latency</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 66%">2/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>History</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 100%">3/3</div>
+        </div>
+      </div>
+      
+      <div class="score-item">
+        <label>Coverage</label>
+        <div class="score-bar">
+          <div class="score-fill" style="width: 33%">1/3</div>
+        </div>
+      </div>
+      
+    </div>
+    <p class="score-total">Total: <strong>13/18</strong> — Proceed with scoped outcomes; parallel-track data remediation</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update Assessment</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Outcomes</h2>
+  
+  <table class="table">
+    <thead><tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Scope</th><th>Timeframe</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td><strong>Time-to-radiologist-read for critical CXR findings</strong></td>
+        <td>4.2 hours average (ED, 7pm-7am shift)</td>
+        <td>Under 30 minutes for AI-flagged critical</td>
+        <td>Emergency Department chest X-rays, Memorial Hospital main campus</td>
+        <td>6 months from pilot start</td>
+      </tr>
+      
+      <tr>
+        <td><strong>Critical finding miss rate</strong></td>
+        <td>8.3% miss rate on overnight CXR reads (per internal audit)</td>
+        <td>Below 3% with AI-assist</td>
+        <td>Pneumothorax, large pleural effusion, widened mediastinum</td>
+        <td>12 months</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+  <details class="form-accordion">
+    <summary>Add Outcome</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Eval Suites</h2>
+  
+  <table class="table">
+    <thead><tr><th>Level</th><th>Description</th><th>Latest Pass Rate</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td><span class="badge">L0</span></td>
+        <td>Safety: prompt injection, PII exposure, DICOM header leakage, fail-safe behavior when model confidence is low</td>
+        <td>
+          
+            
+            <span class="text-green">
+              100.0% (28/28)
+            </span>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="badge">L1</span></td>
+        <td>Assertions: per-pathology sensitivity/specificity, edge cases (pediatric, post-surgical, portable CXR), calibration</td>
+        <td>
+          
+            
+            <span class="text-yellow">
+              94.2% (49/52)
+            </span>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td><span class="badge">L2</span></td>
+        <td>Human+Model: radiologist agreement study, LLM-as-judge on report quality, override analysis</td>
+        <td>
+          
+            
+            <span class="text-yellow">
+              90.7% (136/150)
+            </span>
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+  <details class="form-accordion">
+    <summary>Create Eval Suite</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+  
+  <details class="form-accordion">
+    <summary>Record Eval Run</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+  
+</section>
+
+
+<section class="section">
+  <h2>PDCA History</h2>
+  
+  <div class="timeline">
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[discovery]</span>
+      Started discovery loop
+      <small class="text-muted">2026-04-15T06:32</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[discovery]</span>
+      Scoped to ED CXR only (not CT/MRI). Data readiness 13/18 — coverage gap on night/weekend shifts. Will need 6 months of balanced data collection before model training. Identified 3 commercial models (Annalise.ai, Qure.ai, Aidoc) + 1 in-house option. Regulatory: 510(k) pathway required for autonomous; exempt if radiologist-in-the-loop (L1/L2).
+      <small class="text-muted">2026-04-15T06:32</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-do">do</span>
+      <span class="text-muted">[discovery]</span>
+      Ran retrospective analysis on 12,000 CXR studies from 2024-2025. NLP extracted labels from 94% of reports (6% ambiguous, manually reviewed 500). Created gold-standard dataset: 847 pneumothorax, 1,203 effusion, 312 widened mediastinum, 9,638 negative. Split 70/15/15 train/val/test with stratification by shift time.
+      <small class="text-muted">2026-04-15T06:32</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-check">check</span>
+      <span class="text-muted">[discovery]</span>
+      Baseline model (ResNet-50 pretrained on CheXpert) achieves: Pneumothorax AUC 0.94, Effusion AUC 0.91, Mediastinum AUC 0.87. Night-shift performance 4% lower than day (data imbalance confirmed). False negative rate 4.1% — above our 2% target. Calibration poor above 0.8 confidence threshold.
+      <small class="text-muted">2026-04-15T06:32</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-act">act</span>
+      <span class="text-muted">[discovery]</span>
+      DECISION: Proceed to Validation loop with focus on reducing FN rate. Actions: (1) Augment night-shift training data with synthetic minority oversampling, (2) Switch to EfficientNet-B4 backbone, (3) Add calibration layer (temperature scaling), (4) Establish radiologist review panel for L2 evals.
+      <small class="text-muted">2026-04-15T06:32</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[validation]</span>
+      Started validation loop
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-plan">plan</span>
+      <span class="text-muted">[validation]</span>
+      Validation scope: 8-week prospective pilot on ED night shift (7pm-7am). AI flags displayed to radiologist as advisory (L1 Recommend). Primary endpoints: (1) FN rate on prospective data, (2) time-to-read for critical findings, (3) radiologist satisfaction. IRB approved (exempt — quality improvement, no patient intervention change). Will track override rate as leading indicator.
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-do">do</span>
+      <span class="text-muted">[validation]</span>
+      Week 1-4: EfficientNet-B4 deployed in shadow mode. Processed 2,847 CXR. Model flagged 342 as critical (12.0%). Radiologists independently agreed on 298 (87.1%). 44 false positives — 28 post-op, 11 subtle effusion, 5 artifact. 3 missed criticals caught later — FN rate 0.9% on prospective data (improved from 4.1%). Night-shift performance gap closed to &lt;1%.
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-do">do</span>
+      <span class="text-muted">[validation]</span>
+      Week 5-8: Switched to advisory mode (L1). Radiologists see AI flag + confidence score before reading. Time-to-read for AI-flagged critical: 18 min median (down from 4.2 hours). Override rate: 8.2% (radiologist disagrees with AI flag). Zero missed criticals in advisory mode. Radiologist satisfaction 4.1/5 (n=11 respondents).
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-check">check</span>
+      <span class="text-muted">[validation]</span>
+      Validation results vs targets: (1) Time-to-read: 18 min median — MEETS target (&lt;30 min). (2) FN rate: 0.9% in shadow, 0% in advisory — MEETS target (&lt;2%). (3) False positive rate: 12.0% — MEETS target (&lt;15%). (4) No degradation in non-critical read time. (5) Override rate 8.2% — acceptable range. Key risk: small sample (n=2,847) — need 6+ months for seasonal validation.
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+    <div class="timeline-item">
+      <span class="badge badge-phase-act">act</span>
+      <span class="text-muted">[validation]</span>
+      DECISION: Advance to Scaling loop. Advisory mode (L1) only — NOT proceeding to L2 autonomous until 6-month dataset validates seasonal stability. Actions: (1) Roll out to Day shift + second campus, (2) Integrate with Epic worklist prioritization, (3) Begin FDA 510(k) pre-submission for future L2 path, (4) Establish monthly calibration monitoring (L2.5).
+      <small class="text-muted">2026-04-15T06:36</small>
+    </div>
+    
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Log PDCA Entry</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>PMO Score</h2>
+  
+  <div class="card">
+    <div class="score-summary">
+      <span class="big-number">32/40</span>
+      <span class="badge badge-green">
+        QUALIFIED
+      </span>
+    </div>
+    <div class="score-breakdown">
+      V=5×2 &nbsp;
+      B=4 &nbsp;
+      D=3 &nbsp;
+      C=3 &nbsp;
+      R=4 &nbsp;
+      X=2 &nbsp;
+      P=4
+    </div>
+    <p class="text-muted">High clinical value (patient safety). Strong baselines from audit data. Data ready but coverage gaps. Moderate change risk (radiologist workflow). Highly reversible (advisory mode). High compliance burden (FDA, HIPAA). Strong reuse across other imaging modalities.</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update Initiative</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>ROI</h2>
+  
+  <div class="card">
+    <div class="card-row">
+      <div><label>Created</label><span class="big-number">$1,800,000</span></div>
+      <div><label>Captured</label><span class="big-number">$680,000</span></div>
+      <div><label>TCO</label><span class="big-number">$520,000</span></div>
+      <div>
+        <label>Net</label>
+        
+        <span class="big-number text-green">$160,000</span>
+      </div>
+    </div>
+    <p><span class="badge">estimated</span> — Post-validation: Captured value higher than projected — night shift throughput up 22% (vs 15% projected). TCO lower — open-source EfficientNet reduced licensing cost. FN reduction on track. Still pre-scaling so annualized from 8-week pilot.</p>
+  </div>
+  
+  <details class="form-accordion">
+    <summary>Update ROI</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+<section class="section">
+  <h2>Value Tracking</h2>
+
+  
+  
+  <div class="card">
+    <div class="card-row">
+      <div>
+        <label>Total Created</label>
+        <span class="big-number">$2,215,000</span>
+      </div>
+      <div>
+        <label>Total Captured</label>
+        <span class="big-number">$680,000</span>
+      </div>
+      <div>
+        <label>Capture Rate</label>
+        <span class="big-number">31%</span>
+      </div>
+    </div>
+
+    
+    
+    <h4 style="margin-top: 1rem;">Value Creation</h4>
+    <table class="table">
+      <thead><tr><th>Category</th><th>Amount</th><th>Events</th><th>Confidence</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td><span class="badge">Risk Reduction</span></td>
+          <td>$1,800,000</td>
+          <td>1</td>
+          <td>estimated</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Efficiency</span></td>
+          <td>$320,000</td>
+          <td>1</td>
+          <td>estimated</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Quality</span></td>
+          <td>$95,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+      </tbody>
+    </table>
+    
+
+    
+    <h4 style="margin-top: 1rem;">Value Capture</h4>
+    <table class="table">
+      <thead><tr><th>Category</th><th>Amount</th><th>Events</th><th>Confidence</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td><span class="badge">Efficiency</span></td>
+          <td>$290,000</td>
+          <td>1</td>
+          <td>estimated</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Risk Reduction</span></td>
+          <td>$210,000</td>
+          <td>1</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td><span class="badge">Cost Avoidance</span></td>
+          <td>$180,000</td>
+          <td>1</td>
+          <td>measured</td>
+        </tr>
+        
+      </tbody>
+    </table>
+    
+  </div>
+  
+
+  
+  
+  <details style="margin-top: 1rem;">
+    <summary>Event Log (6)</summary>
+    <table class="table" style="margin-top: 0.5rem;">
+      <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Confidence</th></tr></thead>
+      <tbody>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-blue">capture</span></td>
+          <td>Risk Reduction</td>
+          <td>$210,000</td>
+          <td>Malpractice reserve reduction (preliminary)</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-blue">capture</span></td>
+          <td>Efficiency</td>
+          <td>$290,000</td>
+          <td>ED throughput increase — night shift 22% more reads</td>
+          <td>estimated</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-blue">capture</span></td>
+          <td>Cost Avoidance</td>
+          <td>$180,000</td>
+          <td>Reduced overnight radiologist overtime</td>
+          <td>measured</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Quality</td>
+          <td>$95,000</td>
+          <td>Improved diagnostic consistency (night vs day shift gap closed)</td>
+          <td>projected</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Efficiency</td>
+          <td>$320,000</td>
+          <td>Faster time-to-read on critical CXR (4.2h to 18min)</td>
+          <td>estimated</td>
+        </tr>
+        
+        <tr>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-green">creation</span></td>
+          <td>Risk Reduction</td>
+          <td>$1,800,000</td>
+          <td>Avoided missed critical findings (12 adverse events/yr x $150K)</td>
+          <td>estimated</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </details>
+  
+
+  
+  <details class="form-accordion">
+    <summary>Record Value Event</summary>
+    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  </details>
+</section>
+
+
+  </main>
+
+  <footer class="footer">
+    <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
+  </footer>
+</body>
+</html>
