@@ -11,10 +11,10 @@
     <a href="/ai-kaizen/" class="brand">⚡ AI-Kaizen</a>
     <div class="nav-links">
       <a href="/ai-kaizen/">Dashboard</a>
-      <a href="/ai-kaizen/executive/">Executive</a>
-      <a href="/ai-kaizen/initiatives/">Initiatives</a>
-      <a href="/ai-kaizen/portfolio/roi/">Portfolio ROI</a>
-      <a href="/ai-kaizen/tools/should-be-agent/">Agent Check</a>
+      <a href="/ai-kaizen/executive">Executive</a>
+      <a href="/ai-kaizen/initiatives">Initiatives</a>
+      <a href="/ai-kaizen/portfolio/roi">Portfolio ROI</a>
+      <a href="/ai-kaizen/tools/should-be-agent">Agent Check</a>
     </div>
   </nav>
 
@@ -36,6 +36,71 @@
     <a href="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/canvas" class="btn btn-small">📄 Canvas</a>
   </div>
 </div>
+
+
+<section class="section">
+  <h2>Autonomy Level</h2>
+  <div class="ladder">
+    
+    
+    
+    
+    <div class="ladder-step ladder-locked">
+      <div class="ladder-indicator">
+        
+        <span class="ladder-dot"></span>
+      </div>
+      <div class="ladder-content">
+        <strong>L3: Autonomous</strong>
+        <span class="ladder-lock">🔒</span>
+        <div class="ladder-desc">Agent acts independently within bounds</div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="ladder-step ladder-locked">
+      <div class="ladder-indicator">
+        
+        <span class="ladder-dot"></span>
+      </div>
+      <div class="ladder-content">
+        <strong>L2: Oversight</strong>
+        <span class="ladder-lock">🔒</span>
+        <div class="ladder-desc">Agent acts, human reviews samples</div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="ladder-step ladder-locked">
+      <div class="ladder-indicator">
+        
+        <span class="ladder-dot"></span>
+      </div>
+      <div class="ladder-content">
+        <strong>L1: Recommend</strong>
+        <span class="ladder-lock">🔒</span>
+        <div class="ladder-desc">Agent suggests, human decides</div>
+      </div>
+    </div>
+    
+    
+    
+    <div class="ladder-step ladder-active">
+      <div class="ladder-indicator">
+        <span class="ladder-pulse"></span>
+        <span class="ladder-dot"></span>
+      </div>
+      <div class="ladder-content">
+        <strong>L0: Inform</strong>
+        
+        <div class="ladder-desc">Agent observes and reports only</div>
+      </div>
+    </div>
+    
+  </div>
+</section>
 
 
 <div class="card card-gate card-gate-passed">
@@ -116,8 +181,8 @@
   
   <details class="form-accordion">
     <summary>Update Assessment</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/assess" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/assess" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       
       <div class="form-group form-group-small">
         <label>Existence (0-3)</label>
@@ -179,8 +244,8 @@
   
   <details class="form-accordion">
     <summary>Add Outcome</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/outcome" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/outcome" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group"><label>Metric *</label><input type="text" name="metric" required placeholder="e.g. MTBF"></div>
       <div class="form-group"><label>Baseline *</label><input type="text" name="baseline" required placeholder="e.g. 72h"></div>
       <div class="form-group"><label>Target *</label><input type="text" name="target" required placeholder="e.g. 96-120h"></div>
@@ -243,8 +308,8 @@
   
   <details class="form-accordion">
     <summary>Create Eval Suite</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/eval/scaffold" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/eval/scaffold" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group">
         <label>Level</label>
         <select name="level">
@@ -262,8 +327,8 @@
   
   <details class="form-accordion">
     <summary>Record Eval Run</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/eval/record" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/eval/record" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group">
         <label>Level</label>
         <select name="level">
@@ -283,42 +348,50 @@
 <section class="section">
   <h2>PDCA History</h2>
   
-  <div class="timeline">
-    
-    <div class="timeline-item">
-      <span class="badge badge-phase-plan">plan</span>
-      <span class="text-muted">[discovery]</span>
-      Analyzed 6 months of ticket data. 15K tickets/month, 8 routing categories. Labels 70% accurate — need cleaning.
-      <small class="text-muted">2026-04-18T04:21</small>
+  <div class="terminal">
+    <div class="terminal-header">
+      <span class="terminal-dot terminal-dot-red"></span>
+      <span class="terminal-dot terminal-dot-yellow"></span>
+      <span class="terminal-dot terminal-dot-green"></span>
+      <span class="terminal-title">pdca-log — Customer Support Ticket Routing</span>
     </div>
-    
-    <div class="timeline-item">
-      <span class="badge badge-phase-do">do</span>
-      <span class="text-muted">[discovery]</span>
-      Built classifier v1 using fine-tuned BERT on 50K labeled tickets. Accuracy: 82% on holdout set.
-      <small class="text-muted">2026-04-18T04:21</small>
+    <div class="terminal-body">
+      
+      <div class="terminal-line">
+        <span class="terminal-ts">2026-04-18T04:21</span>
+        <span class="terminal-phase terminal-phase-plan">PLAN</span>
+        <span class="terminal-loop">[loop discovery]</span>
+        <span class="terminal-msg">Analyzed 6 months of ticket data. 15K tickets/month, 8 routing categories. Labels 70% accurate — need cleaning.</span>
+      </div>
+      
+      <div class="terminal-line">
+        <span class="terminal-ts">2026-04-18T04:21</span>
+        <span class="terminal-phase terminal-phase-do">DO</span>
+        <span class="terminal-loop">[loop discovery]</span>
+        <span class="terminal-msg">Built classifier v1 using fine-tuned BERT on 50K labeled tickets. Accuracy: 82% on holdout set.</span>
+      </div>
+      
+      <div class="terminal-line">
+        <span class="terminal-ts">2026-04-18T04:21</span>
+        <span class="terminal-phase terminal-phase-check">CHECK</span>
+        <span class="terminal-loop">[loop discovery]</span>
+        <span class="terminal-msg">L1 evals show 86% pass rate — above S2 threshold (80%). Multi-language tickets are the gap.</span>
+      </div>
+      
+      <div class="terminal-line">
+        <span class="terminal-ts">2026-04-18T04:21</span>
+        <span class="terminal-phase terminal-phase-act">ACT</span>
+        <span class="terminal-loop">[loop discovery]</span>
+        <span class="terminal-msg">Added translation layer. Re-running evals. Ready for validation loop if L1 passes 90%.</span>
+      </div>
+      
     </div>
-    
-    <div class="timeline-item">
-      <span class="badge badge-phase-check">check</span>
-      <span class="text-muted">[discovery]</span>
-      L1 evals show 86% pass rate — above S2 threshold (80%). Multi-language tickets are the gap.
-      <small class="text-muted">2026-04-18T04:21</small>
-    </div>
-    
-    <div class="timeline-item">
-      <span class="badge badge-phase-act">act</span>
-      <span class="text-muted">[discovery]</span>
-      Added translation layer. Re-running evals. Ready for validation loop if L1 passes 90%.
-      <small class="text-muted">2026-04-18T04:21</small>
-    </div>
-    
   </div>
   
   <details class="form-accordion">
     <summary>Log PDCA Entry</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/pdca" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/pdca" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group">
         <label>Phase</label>
         <select name="phase">
@@ -359,8 +432,8 @@
   
   <details class="form-accordion">
     <summary>Update Initiative</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/pmo/score" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/pmo/score" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       
       
       <div class="form-group form-group-small">
@@ -424,8 +497,8 @@
   
   <details class="form-accordion">
     <summary>Update ROI</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/roi" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/roi" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group"><label>Value Created ($) *</label><input type="number" name="value_created" step="0.01" min="0" value="420000.0" required></div>
       <div class="form-group"><label>Value Captured ($) *</label><input type="number" name="value_captured" step="0.01" min="0" value="180000.0" required></div>
       <div class="form-group"><label>TCO ($) *</label><input type="number" name="tco" step="0.01" min="0" value="95000.0" required></div>
@@ -464,8 +537,8 @@
   
   <details class="form-accordion">
     <summary>Record Value Event</summary>
-    <form method="POST" action="/initiatives/customer-support-ticket-routing-11575887/value" class="form-inline">
-      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <form method="POST" action="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887/value" class="form-inline">
+      <input type="hidden" name="csrf_token" value="IjI0MjNjMTk1YmYzMjYxMjQxMTljOTk5NjVhYjQxNzIzODkyZjJlNzUi.aeMN4Q.fxavkw3v-ttTMQBqbQwmOSJfQ14">
       <div class="form-group">
         <label>Type *</label>
         <select name="event_type" required>
@@ -520,5 +593,11 @@
   <footer class="footer">
     <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
   </footer>
+  <script>
+    /* Auto-scroll terminal feed to newest entry */
+    document.querySelectorAll('.terminal-body').forEach(function(el) {
+      el.scrollTop = el.scrollHeight;
+    });
+  </script>
 </body>
 </html>

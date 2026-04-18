@@ -485,3 +485,221 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sources li strong { color: var(--text); }
+
+/* ── Bento Grid (dashboard) ──────────────────────────────── */
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.bento-item {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.bento-wide {
+  grid-column: span 2;
+}
+
+.bento-wide .big-number { font-size: 2.5rem; }
+
+/* ── Terminal Feed (PDCA) ────────────────────────────────── */
+
+.terminal {
+  background: #0a0e14;
+  border: 1px solid #1e2a3a;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 0.75rem;
+  background: #111820;
+  border-bottom: 1px solid #1e2a3a;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-dot-red { background: #ff5f57; }
+.terminal-dot-yellow { background: #febc2e; }
+.terminal-dot-green { background: #28c840; }
+
+.terminal-title {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: #4a5568;
+}
+
+.terminal-body {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.75rem;
+  scroll-behavior: smooth;
+}
+
+.terminal-body::-webkit-scrollbar { width: 6px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb { background: #1e2a3a; border-radius: 3px; }
+
+.terminal-line {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(30, 42, 58, 0.3);
+  align-items: baseline;
+}
+
+.terminal-line:last-child { border-bottom: none; }
+
+.terminal-ts {
+  color: #4a5568;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.terminal-phase {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.terminal-phase-plan { background: rgba(88, 166, 255, 0.15); color: #58a6ff; }
+.terminal-phase-do { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+.terminal-phase-check { background: rgba(210, 153, 34, 0.15); color: #d29922; }
+.terminal-phase-act { background: rgba(163, 113, 247, 0.15); color: #d2a8ff; }
+
+.terminal-loop {
+  color: #4a5568;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.terminal-msg {
+  color: #b0bec5;
+}
+
+/* ── Autonomy Ladder ─────────────────────────────────────── */
+
+.ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1rem 0;
+}
+
+.ladder-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  position: relative;
+  border-left: 2px solid var(--border);
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+
+.ladder-step:last-child { border-left-color: transparent; }
+
+.ladder-indicator {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-left: -19px;
+}
+
+.ladder-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+}
+
+.ladder-active .ladder-dot {
+  border-color: var(--green);
+  background: var(--green);
+  box-shadow: 0 0 12px rgba(63, 185, 80, 0.4);
+}
+
+.ladder-earned .ladder-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.ladder-locked .ladder-dot {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.ladder-pulse {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--green);
+  animation: ladder-glow 2s ease-in-out infinite;
+}
+
+@keyframes ladder-glow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ladder-pulse { animation: none; opacity: 0.5; }
+}
+
+.ladder-content strong {
+  font-size: 0.9rem;
+}
+
+.ladder-active .ladder-content strong { color: var(--green); }
+.ladder-earned .ladder-content strong { color: var(--accent); }
+.ladder-locked .ladder-content strong { color: var(--text-muted); }
+
+.ladder-lock {
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+}
+
+.ladder-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* ── Responsive overrides ────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .bento { grid-template-columns: repeat(2, 1fr); }
+  .bento-wide { grid-column: span 2; }
+  .terminal-ts { display: none; }
+  .terminal-line { flex-wrap: wrap; }
+}

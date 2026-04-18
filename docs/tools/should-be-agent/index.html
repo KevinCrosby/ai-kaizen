@@ -11,10 +11,10 @@
     <a href="/ai-kaizen/" class="brand">⚡ AI-Kaizen</a>
     <div class="nav-links">
       <a href="/ai-kaizen/">Dashboard</a>
-      <a href="/ai-kaizen/executive/">Executive</a>
-      <a href="/ai-kaizen/initiatives/">Initiatives</a>
-      <a href="/ai-kaizen/portfolio/roi/">Portfolio ROI</a>
-      <a href="/ai-kaizen/tools/should-be-agent/">Agent Check</a>
+      <a href="/ai-kaizen/executive">Executive</a>
+      <a href="/ai-kaizen/initiatives">Initiatives</a>
+      <a href="/ai-kaizen/portfolio/roi">Portfolio ROI</a>
+      <a href="/ai-kaizen/tools/should-be-agent">Agent Check</a>
     </div>
   </nav>
 
@@ -29,7 +29,7 @@
 
 
 
-<form method="POST" action="/ai-kaizen/tools/should-be-agent/">
+<form method="POST" action="/ai-kaizen/tools/should-be-agent">
   <table>
     <thead>
       <tr><th>#</th><th>Question</th><th>Weight</th><th>Answer</th></tr>
@@ -145,5 +145,11 @@
   <footer class="footer">
     <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
   </footer>
+  <script>
+    /* Auto-scroll terminal feed to newest entry */
+    document.querySelectorAll('.terminal-body').forEach(function(el) {
+      el.scrollTop = el.scrollHeight;
+    });
+  </script>
 </body>
 </html>
