@@ -33,5 +33,11 @@
   <footer class="footer">
     <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
   </footer>
+  <script>
+    /* Auto-scroll terminal feed to newest entry */
+    document.querySelectorAll('.terminal-body').forEach(function(el) {
+      el.scrollTop = el.scrollHeight;
+    });
+  </script>
 </body>
 </html>

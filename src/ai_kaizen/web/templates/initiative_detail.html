@@ -14,6 +14,32 @@
   </div>
 </div>
 
+{# ── Autonomy Ladder ──────────────────────────────────────── #}
+<section class="section">
+  <h2>Autonomy Level</h2>
+  <div class="ladder">
+    {% set levels = [("L3", "Autonomous", "Agent acts independently within bounds"),
+                     ("L2", "Oversight", "Agent acts, human reviews samples"),
+                     ("L1", "Recommend", "Agent suggests, human decides"),
+                     ("L0", "Inform", "Agent observes and reports only")] %}
+    {% for lvl, name, desc in levels %}
+    {% set is_current = (ini.autonomy_level == lvl) %}
+    {% set is_earned = (lvl <= ini.autonomy_level) %}
+    <div class="ladder-step {% if is_current %}ladder-active{% elif is_earned %}ladder-earned{% else %}ladder-locked{% endif %}">
+      <div class="ladder-indicator">
+        {% if is_current %}<span class="ladder-pulse"></span>{% endif %}
+        <span class="ladder-dot"></span>
+      </div>
+      <div class="ladder-content">
+        <strong>{{ lvl }}: {{ name }}</strong>
+        {% if not is_earned %}<span class="ladder-lock">🔒</span>{% endif %}
+        <div class="ladder-desc">{{ desc }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
 {# ── Gate Status ─────────────────────────────────────────── #}
 <div class="card card-gate card-gate-{{ gate.result }}">
   <h3>Gate Check: {{ gate.result|upper }}</h3>
@@ -162,19 +188,27 @@
   {% endif %}
 </section>
 
-{# ── PDCA History ────────────────────────────────────────── #}
+{# ── PDCA History (Terminal Feed) ─────────────────────────── #}
 <section class="section">
   <h2>PDCA History</h2>
   {% if entries %}
-  <div class="timeline">
-    {% for e in entries %}
-    <div class="timeline-item">
-      <span class="badge badge-phase-{{ e.phase }}">{{ e.phase }}</span>
-      <span class="text-muted">[{{ e.loop }}]</span>
-      {{ e.note }}
-      <small class="text-muted">{{ e.created_at[:16] }}</small>
+  <div class="terminal">
+    <div class="terminal-header">
+      <span class="terminal-dot terminal-dot-red"></span>
+      <span class="terminal-dot terminal-dot-yellow"></span>
+      <span class="terminal-dot terminal-dot-green"></span>
+      <span class="terminal-title">pdca-log — {{ ini.name }}</span>
     </div>
-    {% endfor %}
+    <div class="terminal-body">
+      {% for e in entries %}
+      <div class="terminal-line">
+        <span class="terminal-ts">{{ e.created_at[:16] }}</span>
+        <span class="terminal-phase terminal-phase-{{ e.phase }}">{{ e.phase|upper }}</span>
+        <span class="terminal-loop">[loop {{ e.loop }}]</span>
+        <span class="terminal-msg">{{ e.note }}</span>
+      </div>
+      {% endfor %}
+    </div>
   </div>
   {% endif %}
   <details class="form-accordion">

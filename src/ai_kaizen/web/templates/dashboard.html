@@ -3,40 +3,35 @@
 {% block content %}
 <h1>Portfolio Dashboard</h1>
 
-<div class="card-row card-row-5">
-  <div class="card">
-    <h3>Active Initiatives</h3>
-    <span class="big-number">{{ capacity.active_count }}</span>
-    <small>/ {{ capacity.wip_limit }} WIP limit</small>
-    {% if not capacity.within_limit %}
-      <span class="badge badge-red">Over WIP</span>
-    {% endif %}
-  </div>
-  <div class="card">
-    <h3>Estimated ROI</h3>
-    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_value_created or 0) }}</span>
-    <small>projected value created</small>
-  </div>
-  <div class="card">
+{# ── Bento Grid ──────────────────────────────────────────── #}
+<div class="bento">
+  <div class="bento-item bento-wide card">
     <h3>Actual ROI</h3>
     {% set net = (portfolio.total_value_captured or 0) - (portfolio.total_tco or 0) %}
     <span class="big-number {% if net > 0 %}text-green{% elif net < 0 %}text-red{% endif %}">${{ "{:,.0f}".format(net) }}</span>
     <small>${{ "{:,.0f}".format(portfolio.total_value_captured or 0) }} captured — ${{ "{:,.0f}".format(portfolio.total_tco or 0) }} TCO</small>
   </div>
-  <div class="card">
+  <div class="bento-item card">
+    <h3>Active</h3>
+    <span class="big-number">{{ capacity.active_count }}</span>
+    <small>/ {{ capacity.wip_limit }} WIP limit</small>
+    {% if not capacity.within_limit %}<span class="badge badge-red">Over WIP</span>{% endif %}
+  </div>
+  <div class="bento-item card">
+    <h3>Estimated ROI</h3>
+    <span class="big-number">${{ "{:,.0f}".format(portfolio.total_value_created or 0) }}</span>
+    <small>projected value</small>
+  </div>
+  <div class="bento-item card">
     <h3>Capture Rate</h3>
     {% set capture_pct = ((portfolio.total_value_captured or 0) / portfolio.total_value_created * 100) if portfolio.total_value_created else 0 %}
-    <span class="big-number {% if capture_pct >= 50 %}text-green{% elif capture_pct >= 25 %}text-yellow{% else %}text-red{% endif %}">
-      {{ "{:.1f}".format(capture_pct) }}%
-    </span>
-    <small>of estimated value captured</small>
+    <span class="big-number {% if capture_pct >= 50 %}text-green{% elif capture_pct >= 25 %}text-yellow{% else %}text-red{% endif %}">{{ "{:.1f}".format(capture_pct) }}%</span>
+    <small>of estimated</small>
   </div>
-  <div class="card">
-    <h3>Portfolio ROI</h3>
+  <div class="bento-item card">
+    <h3>Portfolio ROI %</h3>
     {% set roi_pct = portfolio.portfolio_roi or 0 %}
-    <span class="big-number {% if roi_pct > 0 %}text-green{% elif roi_pct < 0 %}text-red{% endif %}">
-      {{ "{:.1f}".format(roi_pct) }}%
-    </span>
+    <span class="big-number {% if roi_pct > 0 %}text-green{% elif roi_pct < 0 %}text-red{% endif %}">{{ "{:.1f}".format(roi_pct) }}%</span>
     <small>net / TCO</small>
   </div>
 </div>
