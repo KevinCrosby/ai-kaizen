@@ -215,12 +215,28 @@ def eval_cmd():
 @click.option("--level", required=True, type=click.Choice(["L0", "L1", "L2", "L2.5", "L3"]),
               prompt="Eval level")
 @click.option("--description", "-d", default="")
-def eval_scaffold(level, description):
-    """Create an eval suite for the current initiative."""
+@click.option("--output-dir", "-o", default="tests/evals", help="Directory for generated test file")
+def eval_scaffold(level, description, output_dir):
+    """Create an eval suite and generate a starter pytest file."""
     store = _store()
     ini = InitiativeService(store).require_current()
     suite = EvalService(store).create_suite(ini["id"], level, description)
     store.close()
+
+    from ai_kaizen.scaffolds.eval_templates import render_template, suggested_filename
+    from pathlib import Path
+
+    content = render_template(level, suite["id"], ini["name"])
+    filename = suggested_filename(level)
+    out_path = Path(output_dir) / filename
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if out_path.exists():
+        console.print(f"  [yellow]⚠ {out_path} already exists — skipping file generation[/]")
+    else:
+        out_path.write_text(content)
+        console.print(f"  [green]📄 Generated {out_path}[/]")
+
     console.print(f"\n[bold green]✓[/] Eval suite created: {suite['id']}")
     console.print(f"  Level: {level}  Initiative: {ini['name']}\n")
 
@@ -769,6 +785,56 @@ def metrics_cmd(as_json):
         if not snap["counters"] and not snap["histograms"]:
             console.print("  [dim]No metrics recorded yet[/]")
         console.print()
+
+
+# ─── canvas ─────────────────────────────────────────────────────────────
+
+@cli.command()
+def canvas():
+    """Export initiative as an A3 one-pager (markdown)."""
+    from ai_kaizen.scaffolds.initiative_canvas import render_canvas
+
+    store = _store()
+    ini = InitiativeService(store).require_current()
+    iid = ini["id"]
+    outcomes = OutcomeService(store).list(iid)
+    suites = EvalService(store).list_suites(iid)
+    eval_runs = {}
+    for s in suites:
+        run = store.latest_eval_run(iid, s["level"])
+        if run:
+            eval_runs[s["level"]] = dict(run)
+    entries = PDCAService(store).list_entries(iid)
+    gate = PDCAService(store).check_gate(iid)
+    dr = DataReadinessService(store).get(iid)
+    score = store.get_initiative_score(iid)
+    roi = store.latest_roi(iid)
+    vs = store.value_summary(iid)
+    store.close()
+
+    md = render_canvas(ini, outcomes, suites, eval_runs, entries, gate, dr, score, roi, vs)
+    click.echo(md)
+
+
+# ─── should-be-agent ────────────────────────────────────────────────────
+
+@cli.command("should-be-agent")
+def should_be_agent():
+    """Interactive: should this task be an agent? 8-question assessment."""
+    from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment, render_assessment_markdown
+
+    console.print("\n[bold]🤖 Should This Be an Agent?[/]\n")
+    console.print("Answer yes/no to each question:\n")
+
+    answers = {}
+    for q in QUESTIONS:
+        resp = click.confirm(f"  {q['question']}", default=False)
+        answers[q["id"]] = resp
+
+    result = run_assessment(answers)
+    md = render_assessment_markdown(result)
+    console.print()
+    click.echo(md)
 
 
 if __name__ == "__main__":

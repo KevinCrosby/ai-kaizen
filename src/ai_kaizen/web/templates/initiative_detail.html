@@ -10,6 +10,7 @@
     <span class="badge badge-{{ ini.status }}">{{ ini.status }}</span>
     <span>{{ ini.current_loop }} → {{ ini.current_phase }}</span>
     <a href="{{ url_for('main.initiative_export', initiative_id=ini.id, format='json') }}" class="btn btn-small">Export JSON</a>
+    <a href="{{ url_for('main.initiative_canvas', initiative_id=ini.id) }}" class="btn btn-small">📄 Canvas</a>
   </div>
 </div>
 

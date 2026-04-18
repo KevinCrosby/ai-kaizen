@@ -85,6 +85,7 @@ Navigate to:
 - **/executive** — CxO Executive Dashboard (7 research-backed metric categories)
 - **/initiatives** — Create & manage initiatives
 - **/portfolio/roi** — Portfolio ROI breakdown
+- **/tools/should-be-agent** — "Should This Be an Agent?" assessment tool
 - **/metrics** — Process metrics (counters, latency histograms)
 
 ### 4. Use the Copilot CLI Skill (Optional)
@@ -165,6 +166,8 @@ ai-kaizen init "My Project"
 | `ai-kaizen roi` | Track ROI with confidence levels |
 | `ai-kaizen status` | Portfolio dashboard or initiative deep-dive |
 | `ai-kaizen export` | Generate markdown/JSON reports |
+| `ai-kaizen canvas` | Export initiative as A3 one-pager (markdown) |
+| `ai-kaizen should-be-agent` | Interactive: should this task be an agent? |
 | `ai-kaizen serve` | Launch the web dashboard |
 | `ai-kaizen metrics` | Show process metrics (counters, latency) |
 
@@ -188,6 +191,8 @@ http://localhost:5001/portfolio/roi # Portfolio ROI breakdown
 - ROI tracking with confidence progression
 - Governance review tracking per initiative
 - JSON and HTML export
+- A3 one-pager canvas export (markdown download)
+- "Should This Be an Agent?" interactive assessment tool
 
 ## CxO Executive Dashboard
 
@@ -297,9 +302,10 @@ ai-kaizen/
 │   ├── domain/models.py    # Pydantic domain models
 │   ├── store/database.py   # SQLite persistence (WAL mode, 14 tables)
 │   ├── services/core.py    # Business logic (7 service classes)
+│   ├── scaffolds/          # Eval templates, canvas, decision tree
 │   └── web/                # Flask web UI
 │       ├── app.py          # App factory, CSRF, lazy store
-│       ├── routes.py       # 18 route handlers
+│       ├── routes.py       # 22 route handlers
 │       ├── templates/      # Jinja2 templates (dark theme)
 │       └── static/style.css
 ├── .github/extensions/
@@ -309,7 +315,7 @@ ai-kaizen/
 │   ├── pmo-framework.md    # PMO portfolio management guide
 │   └── research.md         # Foundation research
 ├── tests/
-│   ├── test_services.py    # 27 service layer tests
+│   ├── test_services.py    # 42 service layer tests
 │   └── test_web.py         # 39 web route + CxO tests
 └── pyproject.toml          # Python 3.9+, Flask, Click, Rich
 ```
@@ -344,7 +350,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 # Run tests
-pytest -v                         # 83 tests
+pytest -v                         # 107 tests
 
 # Run with debug logging
 AI_KAIZEN_LOG_LEVEL=DEBUG ai-kaizen status

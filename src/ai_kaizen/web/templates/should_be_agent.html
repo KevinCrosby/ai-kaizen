@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Should This Be an Agent? — AI-Kaizen{% endblock %}
+
+{% block content %}
+<h1>🤖 Should This Be an Agent?</h1>
+<p class="subtitle">8-question weighted assessment to determine if a task is ready for agentic automation</p>
+
+{% if result %}
+<div class="card {% if result.recommendation == 'STRONG YES' %}card-green{% elif result.recommendation == 'MAYBE' %}card-amber{% else %}card-red{% endif %}" style="margin-bottom:1.5rem">
+  <h2>{{ result.recommendation }} — {{ result.score }}/{{ result.max_score }} ({{ (result.percentage * 100)|round|int }}%)</h2>
+  <p>{{ result.summary }}</p>
+</div>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Question</th><th>Answer</th><th>Points</th></tr>
+  </thead>
+  <tbody>
+    {% for r in result.results %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ r.question }}</td>
+      <td>{{ "✅" if r.answer else "❌" }}</td>
+      <td>{{ r.points }}/{{ r.max_points }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% set gaps = result.results | selectattr("answer", "equalto", false) | list %}
+{% if gaps %}
+<h3>Gaps to Address</h3>
+<ul>
+  {% for r in gaps %}
+  <li><strong>{{ r.question }}</strong> — {{ r.guidance }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<a href="{{ url_for('main.should_be_agent_page') }}" class="btn">↻ Re-assess</a>
+
+{% else %}
+
+<form method="POST" action="{{ url_for('main.should_be_agent_assess') }}">
+  <table>
+    <thead>
+      <tr><th>#</th><th>Question</th><th>Weight</th><th>Answer</th></tr>
+    </thead>
+    <tbody>
+      {% set questions = [
+        {"id":"repetitive","q":"Is the task repetitive (happens >10x/week)?","w":2},
+        {"id":"deterministic","q":"Can success be measured deterministically (clear pass/fail)?","w":3},
+        {"id":"data_available","q":"Is training/reference data readily available?","w":2},
+        {"id":"reversible","q":"Are agent actions easily reversible?","w":2},
+        {"id":"human_bottleneck","q":"Is a human bottleneck causing delays?","w":1},
+        {"id":"structured_io","q":"Are inputs and outputs well-structured?","w":2},
+        {"id":"safety_low","q":"Is the safety risk low (S2-S3, not S0)?","w":2},
+        {"id":"existing_process","q":"Is there a documented process today?","w":1}
+      ] %}
+      {% for q in questions %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ q.q }}</td>
+        <td>×{{ q.w }}</td>
+        <td>
+          <select name="{{ q.id }}">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="submit" class="btn" style="margin-top:1rem">Assess</button>
+</form>
+
+{% endif %}
+{% endblock %}

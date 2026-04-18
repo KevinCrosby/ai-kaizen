@@ -216,3 +216,132 @@ class TestDataReadinessService:
     def test_get_nonexistent(self, tmp_db):
         svc = DataReadinessService(tmp_db)
         assert svc.get("nonexistent") is None
+
+
+# ── Eval scaffold templates ───────────────────────────────────────────
+
+class TestEvalScaffoldTemplates:
+    def test_all_levels_have_templates(self):
+        from ai_kaizen.scaffolds.eval_templates import TEMPLATES
+        for level in ["L0", "L1", "L2", "L2.5", "L3"]:
+            assert level in TEMPLATES, f"Missing template for {level}"
+
+    def test_render_l0_template(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        content = render_template("L0", "eval-l0-abc123", "Test Initiative")
+        assert "eval-l0-abc123" in content
+        assert "Test Initiative" in content
+        assert "class TestPromptInjection" in content
+        assert "class TestDataPrivacy" in content
+        assert "class TestFailSafe" in content
+
+    def test_render_l1_template(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        content = render_template("L1", "eval-l1-xyz789", "My Project")
+        assert "class TestCoreAccuracy" in content
+        assert "class TestEdgeCases" in content
+        assert "class TestRegression" in content
+
+    def test_render_l2_template(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        content = render_template("L2", "eval-l2-def456", "Review Bot")
+        assert "class TestHumanAgreement" in content
+        assert "class TestLLMJudge" in content
+
+    def test_render_l25_template(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        content = render_template("L2.5", "eval-l25-mon001", "Monitor")
+        assert "class TestDataDrift" in content
+        assert "class TestPerformanceDegradation" in content
+
+    def test_render_l3_template(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        content = render_template("L3", "eval-l3-exp001", "Experiment")
+        assert "class TestExperimentDesign" in content
+        assert "class TestRolloutReadiness" in content
+
+    def test_suggested_filename(self):
+        from ai_kaizen.scaffolds.eval_templates import suggested_filename
+        assert suggested_filename("L0") == "test_eval_l0.py"
+        assert suggested_filename("L2.5") == "test_eval_l25.py"
+
+    def test_rendered_template_is_valid_python(self):
+        from ai_kaizen.scaffolds.eval_templates import render_template
+        for level in ["L0", "L1", "L2", "L2.5", "L3"]:
+            content = render_template(level, f"eval-{level}-test", "Test")
+            compile(content, f"test_eval_{level}.py", "exec")  # raises SyntaxError if invalid
+
+
+class TestInitiativeCanvas:
+    """Tests for the initiative canvas A3 one-pager."""
+
+    def test_render_canvas_minimal(self):
+        from ai_kaizen.scaffolds.initiative_canvas import render_canvas
+        ini = {"id": "test-1", "name": "Test", "severity_class": "S2",
+               "autonomy_level": "L1", "current_loop": 1, "current_phase": "plan",
+               "status": "active", "description": "A test initiative"}
+        md = render_canvas(ini, [], [], {}, [], None, None, None, None, None)
+        assert "Initiative Canvas: Test" in md
+        assert "S2" in md
+
+    def test_render_canvas_with_outcomes(self):
+        from ai_kaizen.scaffolds.initiative_canvas import render_canvas
+        ini = {"id": "test-1", "name": "Test", "severity_class": "S2",
+               "autonomy_level": "L1", "current_loop": 1, "current_phase": "plan",
+               "status": "active", "description": "desc"}
+        outcomes = [{"metric": "latency", "baseline": "200ms", "target_range": "50-100ms", "timeframe": "90 days"}]
+        md = render_canvas(ini, outcomes, [], {}, [], None, None, None, None, None)
+        assert "latency" in md
+        assert "200ms" in md
+
+    def test_render_canvas_with_roi(self):
+        from ai_kaizen.scaffolds.initiative_canvas import render_canvas
+        ini = {"id": "test-1", "name": "Test", "severity_class": "S2",
+               "autonomy_level": "L1", "current_loop": 1, "current_phase": "plan",
+               "status": "active", "description": "desc"}
+        roi = {"value_created": 1000000, "value_captured": 500000, "tco_to_date": 200000, "confidence": "projected"}
+        md = render_canvas(ini, [], [], {}, [], None, None, None, roi, None)
+        assert "ROI" in md
+        assert "1,000,000" in md
+
+
+class TestAgentDecisionTree:
+    """Tests for the agent decision tree assessment."""
+
+    def test_strong_yes(self):
+        from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment
+        answers = {q["id"]: True for q in QUESTIONS}
+        result = run_assessment(answers)
+        assert result["recommendation"] == "STRONG YES"
+        assert result["score"] == result["max_score"]
+
+    def test_not_yet(self):
+        from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment
+        answers = {q["id"]: False for q in QUESTIONS}
+        result = run_assessment(answers)
+        assert result["recommendation"] == "NOT YET"
+        assert result["score"] == 0
+
+    def test_maybe_range(self):
+        from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment
+        # Answer yes to first 4 questions (weights: 2+3+2+2 = 9) → MAYBE
+        answers = {}
+        for i, q in enumerate(QUESTIONS):
+            answers[q["id"]] = i < 4
+        result = run_assessment(answers)
+        assert result["recommendation"] == "MAYBE"
+
+    def test_render_markdown(self):
+        from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment, render_assessment_markdown
+        answers = {q["id"]: True for q in QUESTIONS}
+        result = run_assessment(answers)
+        md = render_assessment_markdown(result)
+        assert "STRONG YES" in md
+        assert "✅" in md
+
+    def test_gaps_shown_for_no_answers(self):
+        from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment, render_assessment_markdown
+        answers = {q["id"]: False for q in QUESTIONS}
+        result = run_assessment(answers)
+        md = render_assessment_markdown(result)
+        assert "Gaps to Address" in md

@@ -628,3 +628,51 @@ def governance_review(initiative_id: str):
         flash("Failed to record governance review", "error")
 
     return redirect(url_for("main.initiative_detail", initiative_id=initiative_id))
+
+
+# ─── Canvas export ──────────────────────────────────────────────────────
+
+@bp.route("/initiatives/<initiative_id>/canvas")
+def initiative_canvas(initiative_id: str):
+    from flask import Response
+    from ai_kaizen.scaffolds.initiative_canvas import render_canvas
+
+    ini = _get_initiative_or_404(initiative_id)
+    store = _store()
+
+    outcomes = OutcomeService(store).list(initiative_id)
+    suites = EvalService(store).list_suites(initiative_id)
+    eval_runs = {}
+    for s in suites:
+        run = store.latest_eval_run(initiative_id, s["level"])
+        if run:
+            eval_runs[s["level"]] = dict(run)
+    entries = PDCAService(store).list_entries(initiative_id)
+    gate = PDCAService(store).check_gate(initiative_id)
+    dr = DataReadinessService(store).get(initiative_id)
+    score = store.get_initiative_score(initiative_id)
+    roi = store.latest_roi(initiative_id)
+    vs = store.value_summary(initiative_id)
+
+    md = render_canvas(ini, outcomes, suites, eval_runs, entries, gate, dr, score, roi, vs)
+    return Response(md, mimetype="text/markdown",
+                    headers={"Content-Disposition": f"attachment; filename={initiative_id}-canvas.md"})
+
+
+# ─── Agent decision tree ────────────────────────────────────────────────
+
+@bp.route("/tools/should-be-agent")
+def should_be_agent_page():
+    return render_template("should_be_agent.html")
+
+
+@bp.route("/tools/should-be-agent", methods=["POST"])
+def should_be_agent_assess():
+    from ai_kaizen.scaffolds.agent_decision_tree import QUESTIONS, run_assessment
+
+    answers = {}
+    for q in QUESTIONS:
+        answers[q["id"]] = request.form.get(q["id"]) == "yes"
+
+    result = run_assessment(answers)
+    return render_template("should_be_agent.html", result=result)
