@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Should This Be an Agent? — AI-Kaizen</title>
+  <link rel="stylesheet" href="/ai-kaizen/static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/ai-kaizen/" class="brand">⚡ AI-Kaizen</a>
+    <div class="nav-links">
+      <a href="/ai-kaizen/">Dashboard</a>
+      <a href="/ai-kaizen/executive/">Executive</a>
+      <a href="/ai-kaizen/initiatives/">Initiatives</a>
+      <a href="/ai-kaizen/portfolio/roi/">Portfolio ROI</a>
+      <a href="/ai-kaizen/tools/should-be-agent/">Agent Check</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    
+      
+    
+
+    
+<h1>🤖 Should This Be an Agent?</h1>
+<p class="subtitle">8-question weighted assessment to determine if a task is ready for agentic automation</p>
+
+
+
+<form method="POST" action="/ai-kaizen/tools/should-be-agent/">
+  <table>
+    <thead>
+      <tr><th>#</th><th>Question</th><th>Weight</th><th>Answer</th></tr>
+    </thead>
+    <tbody>
+      
+      
+      <tr>
+        <td>1</td>
+        <td>Is the task repetitive (happens &gt;10x/week)?</td>
+        <td>×2</td>
+        <td>
+          <select name="repetitive">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>2</td>
+        <td>Can success be measured deterministically (clear pass/fail)?</td>
+        <td>×3</td>
+        <td>
+          <select name="deterministic">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>3</td>
+        <td>Is training/reference data readily available?</td>
+        <td>×2</td>
+        <td>
+          <select name="data_available">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>4</td>
+        <td>Are agent actions easily reversible?</td>
+        <td>×2</td>
+        <td>
+          <select name="reversible">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>5</td>
+        <td>Is a human bottleneck causing delays?</td>
+        <td>×1</td>
+        <td>
+          <select name="human_bottleneck">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>6</td>
+        <td>Are inputs and outputs well-structured?</td>
+        <td>×2</td>
+        <td>
+          <select name="structured_io">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>7</td>
+        <td>Is the safety risk low (S2-S3, not S0)?</td>
+        <td>×2</td>
+        <td>
+          <select name="safety_low">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+      <tr>
+        <td>8</td>
+        <td>Is there a documented process today?</td>
+        <td>×1</td>
+        <td>
+          <select name="existing_process">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  <button type="submit" class="btn" style="margin-top:1rem">Assess</button>
+</form>
+
+
+
+  </main>
+
+  <footer class="footer">
+    <p>AI-Kaizen v0.1 — Eval-first AI transformation toolkit</p>
+  </footer>
+</body>
+</html>

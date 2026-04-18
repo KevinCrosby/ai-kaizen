@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Executive Dashboard — AI-Kaizen</title>
-  <link rel="stylesheet" href="../static/style.css">
+  <link rel="stylesheet" href="/ai-kaizen/static/style.css">
 </head>
 <body>
   <nav class="navbar">
-    <a href="../index.html" class="brand">⚡ AI-Kaizen</a>
+    <a href="/ai-kaizen/" class="brand">⚡ AI-Kaizen</a>
     <div class="nav-links">
-      <a href="../index.html">Dashboard</a>
-      <a href="../executive/index.html">Executive</a>
-      <a href="../initiatives/index.html">Initiatives</a>
-      <a href="../portfolio/roi/index.html">Portfolio ROI</a>
+      <a href="/ai-kaizen/">Dashboard</a>
+      <a href="/ai-kaizen/executive/">Executive</a>
+      <a href="/ai-kaizen/initiatives/">Initiatives</a>
+      <a href="/ai-kaizen/portfolio/roi/">Portfolio ROI</a>
+      <a href="/ai-kaizen/tools/should-be-agent/">Agent Check</a>
     </div>
   </nav>
 
@@ -33,24 +34,24 @@
   <div class="card-row">
     <div class="card">
       <h4>Value Captured</h4>
-      <span class="big-number">$4,090,000</span>
+      <span class="big-number">$180,000</span>
     </div>
     <div class="card">
       <h4>Total TCO</h4>
-      <span class="big-number">$6,010,000</span>
+      <span class="big-number">$95,000</span>
     </div>
     <div class="card">
       <h4>Net Value</h4>
       
-      <span class="big-number text-red">
-        $-1,920,000
+      <span class="big-number text-green">
+        $85,000
       </span>
     </div>
     <div class="card">
       <h4>Portfolio ROI</h4>
       
-      <span class="big-number text-red">
-        -31.9%
+      <span class="big-number text-green">
+        89.5%
       </span>
     </div>
   </div>
@@ -64,13 +65,13 @@
   <div class="card-row">
     <div class="card">
       <h4>Discovery</h4>
-      <span class="big-number">6</span>
-      <small>60%</small>
+      <span class="big-number">1</span>
+      <small>100%</small>
     </div>
     <div class="card">
       <h4>Validation</h4>
-      <span class="big-number">4</span>
-      <small>40%</small>
+      <span class="big-number">0</span>
+      <small>0%</small>
     </div>
     <div class="card">
       <h4>Scaling</h4>
@@ -88,8 +89,8 @@
   </div>
   
   <div class="progress-bar-container">
-    <div class="progress-segment seg-discovery" style="width: 60.0%;" title="Discovery: 6"></div>
-    <div class="progress-segment seg-validation" style="width: 40.0%;" title="Validation: 4"></div>
+    <div class="progress-segment seg-discovery" style="width: 100.0%;" title="Discovery: 1"></div>
+    <div class="progress-segment seg-validation" style="width: 0.0%;" title="Validation: 0"></div>
     <div class="progress-segment seg-scaling" style="width: 0.0%;" title="Scaling: 0"></div>
   </div>
   <div class="legend-row">
@@ -111,7 +112,17 @@
 
   <details class="form-accordion">
     <summary>Record Workforce Assessment</summary>
-    <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+    <form method="POST" action="/executive/workforce" class="form-grid">
+      <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+      <label>Total Headcount <input type="number" name="total_headcount" min="1" required value=""></label>
+      <label>AI-Trained Count <input type="number" name="ai_trained_count" min="0" required value=""></label>
+      <label>AI Fluency Score (0-5) <input type="number" step="0.1" name="ai_fluency_score" min="0" max="5" required value=""></label>
+      <label>Roles Redesigned <input type="number" name="roles_redesigned" min="0" required value=""></label>
+      <label>Total Roles <input type="number" name="roles_total" min="1" required value=""></label>
+      <label>Upskilling Completion % <input type="number" step="0.1" name="upskilling_completion_pct" min="0" max="100" required value=""></label>
+      <label class="full-width">Notes <textarea name="notes" rows="2"></textarea></label>
+      <button type="submit" class="btn">Save Assessment</button>
+    </form>
   </details>
 </section>
 
@@ -126,7 +137,7 @@
       <span class="big-number text-red">
         0%
       </span>
-      <small>0 / 10 initiatives</small>
+      <small>0 / 1 initiatives</small>
     </div>
     <div class="card">
       <h4>Completed Reviews</h4>
@@ -139,12 +150,12 @@
       <span class="big-number text-green">
         100%
       </span>
-      <small>10 / 10</small>
+      <small>1 / 1</small>
     </div>
     <div class="card">
       <h4>Active Eval Runs</h4>
       <span class="big-number">100%</span>
-      <small>10 with runs</small>
+      <small>1 with runs</small>
     </div>
   </div>
 </section>
@@ -165,11 +176,11 @@
     <div class="card">
       <h4>Data Assessed</h4>
       <span class="big-number">100%</span>
-      <small>10 / 10</small>
+      <small>1 / 1</small>
     </div>
     <div class="card">
       <h4>Avg Data Score</h4>
-      <span class="big-number">14.3</span>
+      <span class="big-number">14.0</span>
       <small>/ 18</small>
     </div>
   </div>
@@ -183,23 +194,23 @@
   <div class="card-row">
     <div class="card">
       <h4>🔧 Optimize</h4>
-      <span class="big-number">6</span>
-      <small>60% — Surface-level AI</small>
+      <span class="big-number">1</span>
+      <small>100% — Surface-level AI</small>
     </div>
     <div class="card">
       <h4>🔄 Redesign</h4>
-      <span class="big-number">3</span>
-      <small>30% — Process redesign</small>
+      <span class="big-number">0</span>
+      <small>0% — Process redesign</small>
     </div>
     <div class="card">
       <h4>🚀 Reinvent</h4>
-      <span class="big-number text-green">1</span>
-      <small>10% — New products/models</small>
+      <span class="big-number text-green">0</span>
+      <small>0% — New products/models</small>
     </div>
     <div class="card">
       <h4>Reinvention Rate</h4>
       <span class="big-number text-red">
-        10%
+        0%
       </span>
       <small>Benchmark: 34%</small>
     </div>
@@ -214,12 +225,12 @@
   <div class="card-row">
     <div class="card">
       <h4>Total TCO</h4>
-      <span class="big-number">$6,010,000</span>
+      <span class="big-number">$95,000</span>
     </div>
     <div class="card">
       <h4>Net Value</h4>
-      <span class="big-number text-red">
-        $-1,920,000
+      <span class="big-number text-green">
+        $85,000
       </span>
     </div>
   </div>
@@ -231,16 +242,9 @@
     
       <tr>
         <td><span class="badge">estimated</span></td>
-        <td>4</td>
-        <td>$2,030,000</td>
-        <td>$4,090,000</td>
-      </tr>
-    
-      <tr>
-        <td><span class="badge">projected</span></td>
-        <td>6</td>
-        <td>$3,980,000</td>
-        <td>$0</td>
+        <td>1</td>
+        <td>$95,000</td>
+        <td>$180,000</td>
       </tr>
     
     </tbody>

@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Initiatives — AI-Kaizen</title>
-  <link rel="stylesheet" href="../static/style.css">
+  <link rel="stylesheet" href="/ai-kaizen/static/style.css">
 </head>
 <body>
   <nav class="navbar">
-    <a href="../index.html" class="brand">⚡ AI-Kaizen</a>
+    <a href="/ai-kaizen/" class="brand">⚡ AI-Kaizen</a>
     <div class="nav-links">
-      <a href="../index.html">Dashboard</a>
-      <a href="../executive/index.html">Executive</a>
-      <a href="../initiatives/index.html">Initiatives</a>
-      <a href="../portfolio/roi/index.html">Portfolio ROI</a>
+      <a href="/ai-kaizen/">Dashboard</a>
+      <a href="/ai-kaizen/executive/">Executive</a>
+      <a href="/ai-kaizen/initiatives/">Initiatives</a>
+      <a href="/ai-kaizen/portfolio/roi/">Portfolio ROI</a>
+      <a href="/ai-kaizen/tools/should-be-agent/">Agent Check</a>
     </div>
   </nav>
 
@@ -27,7 +28,29 @@
 
 <div class="card">
   <h3>New Initiative</h3>
-  <div class="card"><p class="text-muted">⚡ Forms are available in the live app. Run <code>ai-kaizen serve</code> for full interactivity.</p></div>
+  <form method="POST" action="/initiatives">
+    <input type="hidden" name="csrf_token" value="IjFlZTc3Nzg5ZDViMjc2N2FjZTU2YmQxMjdlMTA3ZjNkOGQyZjMzZjQi.aeMKiQ.lf4G8qk3DOReEzS9_8E4n3_LxWQ">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" required placeholder="e.g. Predictive Maintenance - Line 3">
+      </div>
+      <div class="form-group">
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity">
+          <option value="S0">S0 — Safety-critical</option>
+          <option value="S1">S1 — Revenue/compliance</option>
+          <option value="S2" selected>S2 — Operational</option>
+          <option value="S3">S3 — Advisory</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="2" placeholder="Optional description"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Initiative</button>
+  </form>
 </div>
 
 
@@ -40,120 +63,12 @@
   <tbody>
     
     <tr>
-      <td><a href="../initiatives/adaptive-learning-path-engine-5d0c913f/index.html">Adaptive Learning Path Engine</a></td>
-      <td><span class="badge badge-sev-s3">S3</span></td>
-      <td>discovery → do</td>
-      <td>
-        
-          29/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/contract-review-automation-328059ea/index.html">Contract Review Automation</a></td>
+      <td><a href="/ai-kaizen/initiatives/customer-support-ticket-routing-11575887">Customer Support Ticket Routing</a></td>
       <td><span class="badge badge-sev-s2">S2</span></td>
-      <td>discovery → check</td>
-      <td>
-        
-          31/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/grid-load-balancing-ai-b18f740c/index.html">Grid Load Balancing AI</a></td>
-      <td><span class="badge badge-sev-s0">S0</span></td>
-      <td>discovery → do</td>
-      <td>
-        
-          28/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/demand-forecasting---fresh-produce-96bbec13/index.html">Demand Forecasting — Fresh Produce</a></td>
-      <td><span class="badge badge-sev-s2">S2</span></td>
-      <td>validation → do</td>
-      <td>
-        
-          32/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/claims-triage-and-fraud-detection-cafde80a/index.html">Claims Triage and Fraud Detection</a></td>
-      <td><span class="badge badge-sev-s1">S1</span></td>
       <td>discovery → act</td>
       <td>
         
-          29/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/dynamic-pricing-engine-95fa7de1/index.html">Dynamic Pricing Engine</a></td>
-      <td><span class="badge badge-sev-s2">S2</span></td>
-      <td>discovery → check</td>
-      <td>
-        
-          32/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/predictive-maintenance---cnc-fleet-b432ca83/index.html">Predictive Maintenance — CNC Fleet</a></td>
-      <td><span class="badge badge-sev-s1">S1</span></td>
-      <td>validation → check</td>
-      <td>
-        
           30/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/aml-transaction-monitoring-ai-ddfe551a/index.html">AML Transaction Monitoring AI</a></td>
-      <td><span class="badge badge-sev-s0">S0</span></td>
-      <td>validation → do</td>
-      <td>
-        
-          33/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/pharma-prior-authorization-automation-dc7a0dc6/index.html">Pharma Prior Authorization Automation</a></td>
-      <td><span class="badge badge-sev-s1">S1</span></td>
-      <td>discovery → do</td>
-      <td>
-        
-          31/40
-        
-      </td>
-      <td><span class="badge badge-active">active</span></td>
-    </tr>
-    
-    <tr>
-      <td><a href="../initiatives/radiology-ai-triage-ed-chest-x-rays-8390ad6e/index.html">Radiology AI Triage - ED Chest X-rays</a></td>
-      <td><span class="badge badge-sev-s0">S0</span></td>
-      <td>validation → act</td>
-      <td>
-        
-          32/40
         
       </td>
       <td><span class="badge badge-active">active</span></td>
