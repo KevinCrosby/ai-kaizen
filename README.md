@@ -14,19 +14,18 @@ Every AI initiative must earn the right to act — progressing through bounded a
 
 | Interface | Best For | Start With |
 |-----------|----------|------------|
-| **CLI** | Power users, automation, CI/CD | `pip install -e . && ai-kaizen init "My Project"` |
-| **Web UI** | Visual thinkers, stakeholder demos | `ai-kaizen serve` → http://localhost:5001 |
-| **Copilot Skill** | Natural language, agentic workflows | Just talk — 16 tools auto-activate on keywords |
+| **CLI** (`ai-kaizen`) | Power users, automation, CI/CD | `pip install -e . && ai-kaizen init "My Project"` |
+| **Web UI** | Visual thinkers, stakeholder demos | `ai-kaizen serve` → http://localhost:5000 |
+| **Copilot Skill** | Natural language, agentic workflows | 16 tools auto-activate on keywords |
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- **Python 3.9+** (check with `python3 --version`)
-- **Git**
+- **Python 3.9+** — `python3 --version`
 - **pip** (comes with Python)
 
-### 1. Clone & Install
+### Install
 
 ```bash
 git clone https://github.com/KevinCrosby/ai-kaizen.git
@@ -37,42 +36,34 @@ source .venv/bin/activate        # macOS/Linux
 pip install -e .
 ```
 
-Verify it works:
+Verify: `ai-kaizen --version && ai-kaizen --help`
 
-```bash
-ai-kaizen --version
-ai-kaizen --help
-```
-
-### 2. Run Your First Initiative (CLI)
+### Your First Initiative
 
 ```bash
 # Create an initiative
 ai-kaizen init "Customer Support Ticket Routing"
 
-# Score data readiness (0-3 per dimension, interactive prompts)
-ai-kaizen assess data-readiness
-
-# Define the outcome you're working backwards from
+# Define the target outcome (work backwards from here)
 ai-kaizen outcome set --metric "resolution time" --baseline "45 min avg" --target "15-25 min"
 
-# Scaffold safety eval tests
-ai-kaizen eval scaffold --level L0
+# Score data readiness (0-3 per dimension, interactive)
+ai-kaizen assess data-readiness
 
-# Start the Discovery PDCA loop
-ai-kaizen pdca start discovery
+# Scaffold safety eval tests (generates pytest stubs)
+ai-kaizen eval scaffold --level L0 --output-dir ./evals
 
-# Log what you learned
-ai-kaizen pdca log --phase plan --note "Data readiness 14/18. Routing labels exist but 30% are miscategorized."
+# Log PDCA activity
+ai-kaizen pdca log --phase plan --note "Data readiness 14/18. Labels exist but 30% miscategorized."
 
-# Check the gate — are you ready to proceed?
+# Check the gate — ready to proceed?
 ai-kaizen pdca gate
 
-# View the full portfolio dashboard
+# Portfolio dashboard
 ai-kaizen status
 ```
 
-### 3. Launch the Web UI
+### Launch the Web UI
 
 ```bash
 ai-kaizen serve                           # → http://localhost:5000
@@ -80,76 +71,14 @@ ai-kaizen serve --port 8080               # custom port
 ai-kaizen serve --host 0.0.0.0 --debug    # network-accessible + auto-reload
 ```
 
-Navigate to:
-- **/** — Portfolio dashboard (all initiatives at a glance)
-- **/executive** — CxO Executive Dashboard (7 research-backed metric categories)
-- **/initiatives** — Create & manage initiatives
-- **/portfolio/roi** — Portfolio ROI breakdown
-- **/tools/should-be-agent** — "Should This Be an Agent?" assessment tool
-- **/metrics** — Process metrics (counters, latency histograms)
+### Load the Demo Portfolio
 
-### 4. Use the Copilot CLI Skill (Optional)
-
-If you use [GitHub Copilot CLI](https://githubnext.com/projects/copilot-cli), the 16 AI-Kaizen tools activate automatically:
+A template healthcare portfolio with 10 initiatives across 8 industries is included:
 
 ```bash
-# Per-repo (already included):
-# .github/extensions/ai-kaizen/extension.mjs
-
-# User-wide install:
-mkdir -p ~/.copilot/extensions/ai-kaizen
-cp .github/extensions/ai-kaizen/extension.mjs ~/.copilot/extensions/ai-kaizen/
-```
-
-Then just talk naturally — mention "kaizen", "initiative", "eval", or "transformation" and the tools auto-activate.
-
-### 5. PMO Portfolio Management
-
-When managing multiple initiatives:
-
-```bash
-# Score an initiative across 7 dimensions (1-5 each)
-ai-kaizen pmo score
-
-# View the prioritized backlog
-ai-kaizen pmo rank
-
-# Track ROI with confidence levels
-ai-kaizen roi track --value-created 420000 --value-captured 290000 --tco 180000
-
-# Portfolio health check
-ai-kaizen status
-```
-
-### 6. Export Reports
-
-```bash
-ai-kaizen export --format json      # machine-readable
-ai-kaizen export --format markdown  # shareable document
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `AI_KAIZEN_DB` | `~/.ai-kaizen/kaizen.db` | Database file path |
-| `AI_KAIZEN_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
-| `AI_KAIZEN_LOG_JSON` | `0` | Set to `1` for structured JSON log output |
-| `AI_KAIZEN_SECRET_KEY` | auto-generated | Flask session secret key |
-
-### Data Storage
-
-All data lives in a single SQLite file at `~/.ai-kaizen/kaizen.db`. To start fresh:
-
-```bash
-rm ~/.ai-kaizen/kaizen.db
-```
-
-To use a project-specific database:
-
-```bash
-export AI_KAIZEN_DB=./my-project.db
-ai-kaizen init "My Project"
+# Seed the healthcare template (2 fully-detailed + 8 industry initiatives)
+bash examples/seed-healthcare-portfolio.sh
+ai-kaizen serve --port 5001
 ```
 
 ## CLI Commands
@@ -158,12 +87,15 @@ ai-kaizen init "My Project"
 |---------|-------------|
 | `ai-kaizen init` | Create a new transformation initiative |
 | `ai-kaizen select` | Set the current working initiative |
-| `ai-kaizen assess` | Run data readiness or cultural assessments |
-| `ai-kaizen outcome` | Define and track business outcomes |
-| `ai-kaizen eval` | Scaffold eval suites, record results |
-| `ai-kaizen pdca` | Track PDCA loops, log entries, check gates |
-| `ai-kaizen pmo` | Portfolio scoring, ranking, capacity, estimation |
-| `ai-kaizen roi` | Track ROI with confidence levels |
+| `ai-kaizen assess data-readiness` | 6-dimension data readiness assessment |
+| `ai-kaizen outcome set` | Define measurable business outcome |
+| `ai-kaizen eval scaffold` | Generate eval test stubs (L0-L3 pytest files) |
+| `ai-kaizen eval record` | Record eval run results |
+| `ai-kaizen pdca log` | Log a PDCA entry (plan/do/check/act) |
+| `ai-kaizen pdca gate` | Check gate criteria (kill/continue/promote) |
+| `ai-kaizen pmo score` | 7-dimension PMO scoring |
+| `ai-kaizen pmo rank` | Prioritized initiative backlog |
+| `ai-kaizen roi track` | Track ROI with confidence levels |
 | `ai-kaizen status` | Portfolio dashboard or initiative deep-dive |
 | `ai-kaizen export` | Generate markdown/JSON reports |
 | `ai-kaizen canvas` | Export initiative as A3 one-pager (markdown) |
@@ -173,48 +105,124 @@ ai-kaizen init "My Project"
 
 ## Web UI
 
-A lightweight Flask web app with a dark-themed responsive UI.
+Dark-themed Flask web app — 9 templates, 20 route handlers.
 
-```
-http://localhost:5001/              # Portfolio Dashboard
-http://localhost:5001/executive     # CxO Executive Dashboard (7 metric categories)
-http://localhost:5001/initiatives   # Create & manage initiatives
-http://localhost:5001/portfolio/roi # Portfolio ROI breakdown
-```
+| Route | Page |
+|-------|------|
+| `/` | Portfolio Dashboard — Estimated ROI, Actual ROI, Capture Rate |
+| `/executive` | CxO Executive Dashboard (7 research-backed metric categories) |
+| `/initiatives` | Create & manage initiatives |
+| `/initiatives/<id>` | Initiative detail — outcomes, evals, PDCA, PMO, ROI, governance |
+| `/initiatives/<id>/canvas` | Download A3 one-pager markdown |
+| `/portfolio/roi` | Portfolio ROI breakdown with per-initiative trends |
+| `/tools/should-be-agent` | "Should This Be an Agent?" 8-question assessment |
 
-**Features:**
-- Create initiatives with severity class + transformation type (optimize/redesign/reinvent)
-- Define outcomes, scaffold evals, record eval runs
-- Log PDCA entries, run gate checks
+**Key features:**
+- Severity class (S0-S3) + transformation type (optimize/redesign/reinvent)
+- Define outcomes, scaffold evals, record eval run pass rates
+- PDCA entry logging with loop/phase tracking + gate checks
 - 6-dimension data readiness assessment with visual bars
-- 7-dimension PMO scoring with auto-recommendation
-- ROI tracking with confidence progression
+- 7-dimension PMO scoring → auto-recommend (Fast-track/Qualified/Conditional/Decline)
+- ROI tracking with value created vs captured and confidence progression
+- Value event logging (create/capture/cost) with category breakdown
 - Governance review tracking per initiative
+- A3 one-pager canvas export (markdown download per initiative)
+- "Should This Be an Agent?" interactive weighted assessment tool
 - JSON and HTML export
-- A3 one-pager canvas export (markdown download)
-- "Should This Be an Agent?" interactive assessment tool
 
 ## CxO Executive Dashboard
 
-Research-backed dashboard tracking 7 metric categories that CxOs and AI transformation leaders care most about:
+Research-backed dashboard tracking 7 metric categories:
 
 | # | Category | Source | Tracks |
 |---|----------|--------|--------|
 | 1 | **ROI & Value Realization** | Deloitte | Value captured, TCO, net value, portfolio ROI% |
-| 2 | **Pilot-to-Scale Pipeline** | BCG | Discovery→Validation→Scaling funnel with progress bar |
-| 3 | **Workforce Readiness** | Deloitte (62% cite #1 barrier) | AI fluency, training %, role redesign, upskilling |
-| 4 | **AI Governance** | Deloitte (1-in-5 mature) | Review coverage, eval suite coverage, completion rate |
-| 5 | **Readiness Gap** | Deloitte (42% strategy-ready) | Composite ops readiness (data + eval + governance) |
+| 2 | **Pilot-to-Scale Pipeline** | BCG | Discovery→Validation→Scaling funnel |
+| 3 | **Workforce Readiness** | Deloitte (62% cite #1 barrier) | AI fluency, training %, role redesign |
+| 4 | **AI Governance** | Deloitte (1-in-5 mature) | Review coverage, eval coverage, completion |
+| 5 | **Readiness Gap** | Deloitte (42% strategy-ready) | Composite ops readiness (data+eval+governance) |
 | 6 | **Transformation Depth** | Deloitte (34% reimagining) | Optimize vs Redesign vs Reinvent breakdown |
 | 7 | **Cost Transparency** | BCG/PwC | TCO breakdown by confidence level |
 
 Sources: Deloitte State of AI 2026 (3,235 leaders), BCG AI Survey (1,400 C-suite), MIT Sloan/BCG, PwC.
 
+## Eval Levels & Scaffold Templates
+
+The `eval scaffold` command generates pytest stubs for each level:
+
+| Level | Purpose | Generated Test Classes | Cadence |
+|-------|---------|----------------------|---------|
+| **L0: Safety** | Prompt injection, PII, blast radius | PromptInjection, DataPrivacy, FailSafe, BiasFairness | Pre-deploy gate |
+| **L1: Assertions** | Feature-level correctness | CoreAccuracy, EdgeCases, Regression, Calibration | Every change |
+| **L2: Human+Model** | Domain expert + LLM-as-judge | HumanAgreement, LLMJudge, OverrideAnalysis | Weekly |
+| **L2.5: Monitoring** | Drift, confidence, cost | DataDrift, PerformanceDegradation, OperationalHealth | Always-on |
+| **L3: Experiments** | Controlled A/B, DiD | ExperimentDesign, ExperimentResults, RolloutReadiness | Quarterly+ |
+
+```bash
+ai-kaizen eval scaffold --level L0 --output-dir ./evals   # → test_eval_l0_safety.py
+ai-kaizen eval scaffold --level L1 --output-dir ./evals   # → test_eval_l1_assertions.py
+```
+
+Each file contains test stubs with `NotImplementedError` — fill them in with your domain-specific eval logic.
+
+## Risk-Tiered Thresholds
+
+| Severity | L0 | L1 | L2 |
+|----------|-----|-----|-----|
+| S0: Safety-critical | 100% | ≥95% | ≥90% |
+| S1: Production-critical | 100% | ≥90% | ≥85% |
+| S2: Efficiency | 100% | ≥80% | ≥80% |
+| S3: Advisory | 100% | ≥70% | ≥75% |
+
+## "Should This Be an Agent?" Decision Tree
+
+An 8-question weighted assessment (CLI + web) to determine if a task is ready for agentic automation:
+
+| # | Question | Weight |
+|---|----------|--------|
+| 1 | Is the task repetitive (>10x/week)? | ×2 |
+| 2 | Can success be measured deterministically? | ×3 |
+| 3 | Is training/reference data readily available? | ×2 |
+| 4 | Are agent actions easily reversible? | ×2 |
+| 5 | Is a human bottleneck causing delays? | ×1 |
+| 6 | Are inputs and outputs well-structured? | ×2 |
+| 7 | Is the safety risk low (S2-S3, not S0)? | ×2 |
+| 8 | Is there a documented process today? | ×1 |
+
+**Scoring:** ≥12/15 = **STRONG YES**, 7-11 = **MAYBE** (address gaps), <7 = **NOT YET**
+
+## Initiative Canvas (A3 One-Pager)
+
+Export any initiative as a markdown A3 one-pager for stakeholder reviews:
+
+```bash
+ai-kaizen canvas   # prints markdown to stdout
+```
+
+Includes: initiative metadata, outcomes, eval pass rates, PDCA history, gate status, data readiness, PMO score, ROI summary, and value tracking — all on one page.
+
+Also available as a download button on each initiative's web detail page.
+
+## PMO: Portfolio Prioritization & ROI
+
+```bash
+ai-kaizen pmo score              # Interactive 7-dimension scoring
+ai-kaizen pmo rank               # Prioritized backlog
+ai-kaizen roi track --value-created 420000 --value-captured 290000 --tco 180000
+ai-kaizen status                 # Portfolio dashboard with Estimated/Actual ROI
+```
+
+**7-Dimension Scoring Rubric:** Business Value (2×), Baseline Measurability, Data Readiness, Change Readiness, Reversibility, Compliance Burden, Platform Reuse → Score out of 40 → Fast-track / Qualified / Conditional / Decline.
+
+**ROI Confidence Progression:** Projected (±50%) → Estimated (±30%) → Measured (±15%) → Validated (±10%). Each level requires progressively harder evidence.
+
+**Portfolio Dashboard:** Shows total Estimated ROI (value created), Actual ROI (captured − TCO), Capture Rate %, and per-initiative breakdown with green/red indicators.
+
+See [docs/pmo-framework.md](docs/pmo-framework.md) for the complete PMO guide.
+
 ## Copilot CLI Skill
 
-The toolkit ships as a **GitHub Copilot CLI extension** with 16 tools. When working in any directory, just mention kaizen/initiative/transformation and the tools activate automatically.
-
-**Available tools:**
+Ships as a **GitHub Copilot CLI extension** with 16 tools. Mention "kaizen", "initiative", "eval", or "transformation" and tools auto-activate.
 
 | Tool | Description |
 |------|-------------|
@@ -235,9 +243,9 @@ The toolkit ships as a **GitHub Copilot CLI extension** with 16 tools. When work
 | `ai-kaizen-portfolio` | Portfolio health summary |
 | `ai-kaizen-serve` | Launch web dashboard |
 
-**Install the skill:**
+**Install:**
 - **Per-repo:** Already in `.github/extensions/ai-kaizen/` — works for anyone who clones
-- **User-wide:** Copy `.github/extensions/ai-kaizen/` to `~/.copilot/extensions/ai-kaizen/`
+- **User-wide:** Copy to `~/.copilot/extensions/ai-kaizen/`
 
 ## Framework Architecture
 
@@ -254,81 +262,71 @@ The toolkit ships as a **GitHub Copilot CLI extension** with 16 tools. When work
 
 **Execution:** Three nested PDCA loops — Discovery (2-4 weeks) → Validation (6-12 weeks) → Scaling (ongoing)
 
-## Eval Levels
-
-| Level | Purpose | Cadence |
-|-------|---------|---------|
-| **L0: Safety** | Prompt injection, PII, blast radius, idempotency | Pre-deploy gate (non-negotiable) |
-| **L1: Assertions** | Feature-level correctness tests | Every code/prompt change |
-| **L2: Human+Model** | Domain expert + LLM-as-judge review | Weekly |
-| **L2.5: Monitoring** | Drift, confidence, override rate, cost | Always-on |
-| **L3: Experiments** | Controlled A/B, DiD, stepped-wedge | Quarterly+ |
-
-## Risk-Tiered Thresholds
-
-| Severity | L0 | L1 | L2 |
-|----------|-----|-----|-----|
-| S0: Safety-critical | 100% | ≥95% | ≥90% |
-| S1: Production-critical | 100% | ≥90% | ≥85% |
-| S2: Efficiency | 100% | ≥80% | ≥80% |
-| S3: Advisory | 100% | ≥70% | ≥75% |
-
-## PMO: Portfolio Prioritization & ROI
-
-The toolkit includes a full PMO framework for managing multiple initiatives at scale:
-
-```bash
-ai-kaizen pmo score              # Interactive 7-dimension scoring
-ai-kaizen pmo rank               # Prioritized backlog
-ai-kaizen pmo dashboard          # Portfolio health scorecard
-ai-kaizen pmo capacity           # WIP limit check + bottleneck analysis
-ai-kaizen roi track --value-created 420000 --value-captured 290000 --tco 180000
-ai-kaizen roi portfolio          # Portfolio-level ROI summary
-ai-kaizen pmo estimate --size M  # T-shirt size → cost estimate
-```
-
-**7-Dimension Scoring Rubric:** Business Value (2×), Baseline Measurability, Data Readiness, Change Readiness, Reversibility, Compliance Burden, Platform Reuse → Score out of 40 → Fast-track / Qualified / Conditional / Decline.
-
-**ROI Confidence Progression:** Projected (±50%) → Estimated (±30%) → Measured (±15%) → Validated (±10%). Each level requires progressively harder evidence.
-
-See [docs/pmo-framework.md](docs/pmo-framework.md) for the complete PMO guide.
-
 ## Project Structure
 
 ```
 ai-kaizen/
 ├── src/ai_kaizen/
-│   ├── cli.py              # Click CLI entry point
-│   ├── domain/models.py    # Pydantic domain models
-│   ├── store/database.py   # SQLite persistence (WAL mode, 14 tables)
-│   ├── services/core.py    # Business logic (7 service classes)
-│   ├── scaffolds/          # Eval templates, canvas, decision tree
-│   └── web/                # Flask web UI
-│       ├── app.py          # App factory, CSRF, lazy store
-│       ├── routes.py       # 22 route handlers
-│       ├── templates/      # Jinja2 templates (dark theme)
-│       └── static/style.css
-├── .github/extensions/
-│   └── ai-kaizen/          # Copilot CLI skill (16 tools)
+│   ├── cli.py                  # Click CLI (17 commands, 841 lines)
+│   ├── domain/models.py        # Pydantic domain models
+│   ├── store/database.py       # SQLite persistence (WAL mode, 15 tables)
+│   ├── services/core.py        # Business logic (7 service classes)
+│   ├── scaffolds/
+│   │   ├── eval_templates.py   # L0-L3 pytest scaffold generators
+│   │   ├── initiative_canvas.py # A3 one-pager markdown export
+│   │   └── agent_decision_tree.py # 8-question agent readiness check
+│   ├── logging_config.py       # Structured logging (JSON optional)
+│   ├── metrics.py              # Process metrics (counters, histograms)
+│   └── web/
+│       ├── app.py              # Flask app factory, CSRF, lazy store
+│       ├── routes.py           # 20 route handlers
+│       └── templates/          # 9 Jinja2 templates (dark theme)
+├── .github/
+│   ├── extensions/ai-kaizen/   # Copilot CLI skill (16 tools)
+│   └── copilot-instructions.md # DB conventions, test commands, macOS notes
 ├── docs/
-│   ├── framework-v2.md     # Full framework document
-│   ├── pmo-framework.md    # PMO portfolio management guide
-│   └── research.md         # Foundation research
+│   ├── index.html              # Static site for file:// browsing
+│   ├── framework-v2.md         # Full framework document
+│   ├── pmo-framework.md        # PMO portfolio management guide
+│   └── research.md             # Foundation research
+├── examples/
+│   └── seed-healthcare-portfolio.sh  # Template portfolio seed script
 ├── tests/
-│   ├── test_services.py    # 42 service layer tests
-│   └── test_web.py         # 39 web route + CxO tests
-└── pyproject.toml          # Python 3.9+, Flask, Click, Rich
+│   ├── test_services.py        # 42 service + scaffold tests
+│   ├── test_web.py             # 39 web route + CxO dashboard tests
+│   ├── test_store.py           # 27 store layer tests
+│   └── evals/test_eval_l0.py   # Example L0 safety eval stubs
+└── pyproject.toml              # Python 3.9+, Flask, Click, Rich, Pydantic
 ```
+
+## Template Portfolio (10 Industries)
+
+The demo database includes fully-populated initiatives across 8 industries:
+
+| Industry | Initiative | Severity | Status |
+|----------|-----------|----------|--------|
+| Healthcare | AI-Powered Radiology Triage | S0 | Active |
+| Pharma | Clinical Trial Patient Matching | S1 | Active |
+| Financial Services | AML Transaction Monitoring | S1 | Active |
+| Manufacturing | Predictive Maintenance | S2 | Active |
+| Retail | Dynamic Pricing Engine | S2 | Active |
+| Insurance | Claims Triage Automation | S1 | Active |
+| Logistics | Demand Forecasting | S2 | Active |
+| Energy | Grid Load Balancing | S1 | Active |
+| Legal | Contract Review Automation | S2 | Active |
+| EdTech | Adaptive Learning Paths | S3 | Active |
+
+Each has outcomes, eval suites with runs, PDCA history, data readiness, PMO scores, ROI entries, and value events.
 
 ## Who Uses What
 
 | Role | CLI | Web | Copilot Skill |
 |------|-----|-----|---------------|
 | **CxO / VP** | `status` | Executive Dashboard | `ai-kaizen-executive-snapshot` |
-| **Transformation Owner** | `init`, `outcome`, `pdca` | Initiative detail page | Natural language prompts |
+| **Transformation Owner** | `init`, `outcome`, `pdca`, `canvas` | Initiative detail + canvas download | Natural language |
 | **PMO / Portfolio Mgr** | `pmo rank`, `roi` | Portfolio ROI page | `ai-kaizen-pmo-score`, `ai-kaizen-roi` |
 | **AI/Eval Engineer** | `eval scaffold`, `eval record` | Eval forms | `ai-kaizen-eval-*` |
-| **Frontline Supervisor** | `pdca gate` | Gate check card | `ai-kaizen-gate` |
+| **Frontline Supervisor** | `pdca gate`, `should-be-agent` | Gate check + Agent Check page | `ai-kaizen-gate` |
 
 ## The Key Idea
 
@@ -349,8 +347,8 @@ cd ai-kaizen
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Run tests
-pytest -v                         # 107 tests
+# Run tests (108 passing, excludes eval stubs)
+python -m pytest tests/ --ignore=tests/evals -q
 
 # Run with debug logging
 AI_KAIZEN_LOG_LEVEL=DEBUG ai-kaizen status
@@ -358,10 +356,24 @@ AI_KAIZEN_LOG_LEVEL=DEBUG ai-kaizen status
 # Dev server with auto-reload
 ai-kaizen serve --debug
 
-# Check process metrics
-ai-kaizen metrics
+# Process metrics
 ai-kaizen metrics --json
 ```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AI_KAIZEN_DB` | `~/.ai-kaizen/kaizen.db` | SQLite database file path |
+| `AI_KAIZEN_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
+| `AI_KAIZEN_LOG_JSON` | `0` | Set to `1` for structured JSON log output |
+| `AI_KAIZEN_SECRET_KEY` | auto-generated | Flask session secret key |
+
+### Data Storage
+
+All data lives in a single SQLite file (WAL mode, 15 tables). To start fresh: `rm ~/.ai-kaizen/kaizen.db`
+
+Project-specific database: `export AI_KAIZEN_DB=./my-project.db`
 
 ## Troubleshooting
 
@@ -371,6 +383,7 @@ ai-kaizen metrics --json
 | `No initiative selected` | Run `ai-kaizen init "Name"` or `ai-kaizen select` |
 | DB locked errors | Close other ai-kaizen processes; DB uses WAL mode with 5s timeout |
 | Web UI won't start | Check port isn't in use: `lsof -i :5000` |
+| Template changes not showing | Restart Flask (no auto-reload in production mode) |
 | Copilot skill not loading | Run `node --check .github/extensions/ai-kaizen/extension.mjs` |
 
 ## License
