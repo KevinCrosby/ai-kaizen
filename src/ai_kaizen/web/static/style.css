@@ -86,6 +86,9 @@ a:hover { text-decoration: underline; }
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
+.card-row-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
 
 .card-small { text-align: center; }
 
@@ -354,6 +357,7 @@ input:focus, textarea:focus, select:focus {
   .navbar { padding: 0.75rem 1rem; }
   .container { padding: 1rem; }
   .card-row { grid-template-columns: repeat(2, 1fr); }
+  .card-row-5 { grid-template-columns: repeat(2, 1fr); }
   .form-inline { flex-direction: column; }
   .form-group { min-width: 100%; }
   .form-group-small { max-width: none; }
